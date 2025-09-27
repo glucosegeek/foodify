@@ -409,13 +409,13 @@ export function FeaturedRestaurants() {
 
   return (
     <div className="bg-gray-50">
-      {/* TOP 15 RESTAURANTS SECTION */}
+      {/* TOP 10 RESTAURANTS SECTION */}
       <section className="py-16 bg-white border-b-4 border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Top 15 Restaurants of the Month
+                Top 10 Restaurants of the Month
               </h2>
               <p className="text-lg text-gray-600">
                 Discover the most popular restaurants chosen by our community
