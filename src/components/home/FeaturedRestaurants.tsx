@@ -467,7 +467,6 @@ export function FeaturedRestaurants() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-3">
                       <a
-                        href={restaurant.website}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xl font-bold text-gray-900 group-hover:text-orange-500 transition-colors hover:underline"
