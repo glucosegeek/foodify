@@ -12,22 +12,26 @@ import { RestaurantDashboardLayout } from './components/dashboard/RestaurantDash
 import { DashboardLayout } from './components/dashboard/DashboardLayout';
 import { DashboardOverview } from './pages/dashboard/DashboardOverview';
 
-// Customer Pages (będą utworzone w następnych krokach)
-import { CustomerProfile } from './pages/dashboard/customer/CustomerProfile';
-import { CustomerActivities } from './pages/dashboard/customer/CustomerActivities';
-import { CustomerFollowing } from './pages/dashboard/customer/CustomerFollowing';
-import { CustomerFavorites } from './pages/dashboard/customer/CustomerFavorites';
-import { CustomerNotifications } from './pages/dashboard/customer/CustomerNotifications';
-import { CustomerSettings } from './pages/dashboard/customer/CustomerSettings';
+// Customer Pages
+import { 
+  CustomerProfile, 
+  CustomerActivities, 
+  CustomerFollowing, 
+  CustomerFavorites, 
+  CustomerNotifications, 
+  CustomerSettings 
+} from './pages/dashboard/customer';
 
-// Restaurant Pages (będą utworzone w następnych krokach)
-import { RestaurantProfile } from './pages/dashboard/restaurant/RestaurantProfile';
-import { RestaurantMenu } from './pages/dashboard/restaurant/RestaurantMenu';
-import { RestaurantReviews } from './pages/dashboard/restaurant/RestaurantReviews';
-import { RestaurantFollowers } from './pages/dashboard/restaurant/RestaurantFollowers';
-import { RestaurantPosts } from './pages/dashboard/restaurant/RestaurantPosts';
-import { RestaurantAnalytics } from './pages/dashboard/restaurant/RestaurantAnalytics';
-import { RestaurantSettings } from './pages/dashboard/restaurant/RestaurantSettings';
+// Restaurant Pages
+import { 
+  RestaurantProfile,
+  RestaurantMenu,
+  RestaurantReviews,
+  RestaurantFollowers,
+  RestaurantPosts,
+  RestaurantAnalytics,
+  RestaurantSettings
+} from './pages/dashboard/restaurant';
 
 // Placeholder components (zostaną zastąpione rzeczywistymi komponentami)
 const PlaceholderPage = ({ title }: { title: string }) => (
