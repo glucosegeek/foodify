@@ -7,7 +7,7 @@ import { AuthPage } from './pages/AuthPage';
 // import { RestaurantPage } from './pages/RestaurantPage'; 
 import { CustomerDashboardLayout } from './components/dashboard/CustomerDashboardLayout';
 import { RestaurantDashboardLayout } from './components/dashboard/RestaurantDashboardLayout';
-import { AdminDashboardLayout } from './components/dashboard/AdminDashboardLayout';
+// import { AdminDashboardLayout } from './components/dashboard/AdminDashboardLayout'; 
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RoleBasedRoute } from './components/RoleBasedRoute';
 
