@@ -4,7 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
-import { RestaurantPage } from './pages/RestaurantPage';
+// import { RestaurantPage } from './pages/RestaurantPage'; 
 import { CustomerDashboardLayout } from './components/dashboard/CustomerDashboardLayout';
 import { RestaurantDashboardLayout } from './components/dashboard/RestaurantDashboardLayout';
 import { AdminDashboardLayout } from './components/dashboard/AdminDashboardLayout';
