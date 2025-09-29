@@ -268,3 +268,110 @@ export function RestaurantDetailPage() {
                   </div>
                 </div>
               </div>
+
+              <p className="text-gray-600 text-lg mb-6">
+                {restaurant.description}
+              </p>
+
+              {/* Contact Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="flex items-center text-gray-600">
+                  <MapPin className="h-5 w-5 mr-2 text-orange-500" />
+                  <span>{restaurant.location}</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Phone className="h-5 w-5 mr-2 text-orange-500" />
+                  <span>{restaurant.phone}</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Globe className="h-5 w-5 mr-2 text-orange-500" />
+                  <a href={restaurant.website} target="_blank" rel="noopener noreferrer" className="hover:text-orange-500">
+                    Visit Website
+                  </a>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Clock className="h-5 w-5 mr-2 text-orange-500" />
+                  <span>{restaurant.dining_style}</span>
+                </div>
+              </div>
+
+              {/* Dietary Options */}
+              {restaurant.dietary_options.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Dietary Options:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {restaurant.dietary_options.map(option => (
+                      <span
+                        key={option}
+                        className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full"
+                      >
+                        {option}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Standout Dish */}
+              <div className="mt-6 bg-orange-50 rounded-lg p-4 border border-orange-200">
+                <h3 className="text-sm font-semibold text-orange-800 mb-1">Signature Dish</h3>
+                <p className="text-orange-900 font-medium">{restaurant.standout_dish}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Menu Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Menu</h2>
+          
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-2">
+            {categories.map(category => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedCategory === category
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Menu Items Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredMenuItems.map(item => (
+            <Card key={item.id} hover>
+              {item.image_url && (
+                <img
+                  src={item.image_url}
+                  alt={item.name}
+                  className="w-full h-48 object-cover rounded-t-xl"
+                />
+              )}
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl font-bold text-gray-900">{item.name}</h3>
+                  <span className="text-xl font-bold text-orange-600">
+                    ${item.price.toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-gray-600 text-sm mb-3">{item.description}</p>
+                <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                  {item.category}
+                </span>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
