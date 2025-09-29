@@ -4,8 +4,15 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
-import { RestaurantPage } from './pages/RestaurantPage';
+import { DashboardLayout } from './components/dashboard/DashboardLayout';
+import { DashboardOverview } from './pages/dashboard/DashboardOverview';
+import { RestaurantProfile } from './pages/dashboard/RestaurantProfile';
+import { MenuManagement } from './pages/dashboard/MenuManagement';
+import { AddMenuItem } from './pages/dashboard/AddMenuItem';
+import { Analytics } from './pages/dashboard/Analytics';
+import { Settings } from './pages/dashboard/Settings';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { NotFound } from './pages/NotFound';
 
 function App() {
   return (
@@ -14,22 +21,29 @@ function App() {
         <div className="min-h-screen bg-gray-50">
           <Header />
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/restaurant/:id" element={<RestaurantPage />} />
             
-            {/* Temporary simple dashboard */}
-            <Route 
-              path="/dashboard/*" 
+            {/* Protected dashboard routes */}
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <div className="p-8">
-                    <h1 className="text-2xl font-bold">Dashboard - Coming Soon</h1>
-                    <p>Your role-based dashboard will appear here.</p>
-                  </div>
+                  <DashboardLayout />
                 </ProtectedRoute>
-              } 
-            />
+              }
+            >
+              <Route index element={<DashboardOverview />} />
+              <Route path="profile" element={<RestaurantProfile />} />
+              <Route path="menu" element={<MenuManagement />} />
+              <Route path="menu/add" element={<AddMenuItem />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+            
+            {/* 404 fallback */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Router>
