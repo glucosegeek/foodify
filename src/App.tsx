@@ -5,10 +5,7 @@ import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
 import { RestaurantPage } from './pages/RestaurantPage';
-import { CustomerDashboardLayout } from './components/dashboard/CustomerDashboardLayout';
-import { RestaurantDashboardLayout } from './components/dashboard/RestaurantDashboardLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { RoleBasedRoute } from './components/RoleBasedRoute';
 
 function App() {
   return (
@@ -17,58 +14,19 @@ function App() {
         <div className="min-h-screen bg-gray-50">
           <Header />
           <Routes>
-            {/* Public routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/restaurant/:id" element={<RestaurantPage />} />
             
-            {/* Customer Dashboard */}
-            <Route
-              path="/dashboard/customer/*"
-              element={
-                <ProtectedRoute>
-                  <RoleBasedRoute allowedRoles={['CUSTOMER']}>
-                    <CustomerDashboardLayout />
-                  </RoleBasedRoute>
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<div className="p-8"><h1 className="text-2xl font-bold">Customer Dashboard - Coming Soon</h1></div>} />
-              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Profile - Coming Soon</h1></div>} />
-              <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Activities - Coming Soon</h1></div>} />
-              <Route path="following" element={<div className="p-8"><h1 className="text-2xl font-bold">Following - Coming Soon</h1></div>} />
-              <Route path="favorites" element={<div className="p-8"><h1 className="text-2xl font-bold">Favorites - Coming Soon</h1></div>} />
-              <Route path="notifications" element={<div className="p-8"><h1 className="text-2xl font-bold">Notifications - Coming Soon</h1></div>} />
-              <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings - Coming Soon</h1></div>} />
-            </Route>
-
-            {/* Restaurant Dashboard */}
-            <Route
-              path="/dashboard/restaurant/*"
-              element={
-                <ProtectedRoute>
-                  <RoleBasedRoute allowedRoles={['RESTAURANT']}>
-                    <RestaurantDashboardLayout />
-                  </RoleBasedRoute>
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<div className="p-8"><h1 className="text-2xl font-bold">Restaurant Dashboard - Coming Soon</h1></div>} />
-              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Profile - Coming Soon</h1></div>} />
-              <Route path="menu" element={<div className="p-8"><h1 className="text-2xl font-bold">Menu - Coming Soon</h1></div>} />
-              <Route path="reviews" element={<div className="p-8"><h1 className="text-2xl font-bold">Reviews - Coming Soon</h1></div>} />
-              <Route path="followers" element={<div className="p-8"><h1 className="text-2xl font-bold">Followers - Coming Soon</h1></div>} />
-              <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions - Coming Soon</h1></div>} />
-              <Route path="stats" element={<div className="p-8"><h1 className="text-2xl font-bold">Stats - Coming Soon</h1></div>} />
-              <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings - Coming Soon</h1></div>} />
-            </Route>
-
-            {/* Redirect old /dashboard to role-specific */}
+            {/* Temporary simple dashboard */}
             <Route 
-              path="/dashboard" 
+              path="/dashboard/*" 
               element={
                 <ProtectedRoute>
-                  <RoleBasedRoute allowedRoles={['CUSTOMER', 'RESTAURANT', 'ADMIN']} />
+                  <div className="p-8">
+                    <h1 className="text-2xl font-bold">Dashboard - Coming Soon</h1>
+                    <p>Your role-based dashboard will appear here.</p>
+                  </div>
                 </ProtectedRoute>
               } 
             />
