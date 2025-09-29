@@ -4,9 +4,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
-import { RestaurantPage } from './pages/RestaurantPage';
-// UWAGA: NIE importujemy starego DashboardLayout!
-// import { DashboardLayout } from './components/dashboard/DashboardLayout'; // ❌ USUŃ TO
 import { CustomerDashboardLayout } from './components/dashboard/CustomerDashboardLayout';
 import { RestaurantDashboardLayout } from './components/dashboard/RestaurantDashboardLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
