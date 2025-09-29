@@ -775,6 +775,7 @@ export function FeaturedRestaurants() {
                   {filteredRestaurants.map((restaurant) => (
                     <Link key={restaurant.id} to={`/restaurant/${restaurant.id}`}>
                       <Card className="cursor-pointer group" hover>
+                        <Link to={`/restaurant/${restaurant.id}`}>
                         <div className="relative">
                           <img
                             src={restaurant.logo_url}
@@ -785,6 +786,7 @@ export function FeaturedRestaurants() {
                             {renderStars(restaurant.rating)}
                           </div>
                         </div>
+                        </Link>
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-3">
                             <h3
