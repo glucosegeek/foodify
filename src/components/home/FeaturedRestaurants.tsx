@@ -519,23 +519,24 @@ export function FeaturedRestaurants() {
               className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {topRestaurants.map((restaurant, index) => (
-                <Link key={restaurant.id} to={`/restaurant/${restaurant.id}`}>
-                  <Card
-                    className="flex-none w-80 cursor-pointer group"
-                    hover
-                  >
-                    <div className="relative">
-                      <img
-                        src={restaurant.logo_url}
-                        alt={restaurant.name}
-                        className="w-full h-48 object-cover rounded-t-xl"
-                      />
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-orange-500 text-white text-sm font-bold px-3 py-1 rounded-full">
-                          #{index + 1}
-                        </span>
-                      </div>
+             {topRestaurants.map((restaurant, index) => (
+  <Link key={restaurant.id} to={`/restaurant/${restaurant.id}`}>
+    <Card className="flex-none w-80 cursor-pointer group" hover>
+      <div className="relative">
+        <img
+          src={restaurant.logo_url}
+          alt={restaurant.name}
+          className="w-full h-48 object-cover rounded-t-xl"
+        />
+        <div className="absolute top-4 left-4">
+          <span className="bg-orange-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+            #{index + 1}
+          </span>
+        </div>
+        <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
+          {renderStars(restaurant.rating)}
+        </div>
+      </div>
                       <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
                         {renderStars(restaurant.rating)}
                       </div>
