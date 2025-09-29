@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Phone, Globe, Star, DollarSign, Clock, ArrowLeft } from 'lucide-react';
-import { Card, CardContent } from '../components/ui/Card';
+import { MapPin, Phone, Globe, Star, DollarSign, Clock, ArrowLeft, ThumbsUp } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Restaurant {
   id: string;
@@ -29,12 +30,32 @@ interface MenuItem {
   image_url: string | null;
 }
 
+interface Review {
+  id: string;
+  user_name: string;
+  user_email: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  helpful_count: number;
+}
+
 export function RestaurantDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  
+  // Review form state
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReview, setNewReview] = useState({
+    rating: 5,
+    comment: '',
+  });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   // Mock data - same as in FeaturedRestaurants
   const featuredRestaurants: Restaurant[] = [
@@ -151,6 +172,37 @@ export function RestaurantDetailPage() {
     },
   ];
 
+  // Mock reviews
+  const mockReviews: Review[] = [
+    {
+      id: '1',
+      user_name: 'John Doe',
+      user_email: 'john@example.com',
+      rating: 5,
+      comment: 'Absolutely amazing experience! The food was delicious and the service was impeccable. Highly recommend the truffle risotto!',
+      created_at: '2024-01-15',
+      helpful_count: 12,
+    },
+    {
+      id: '2',
+      user_name: 'Jane Smith',
+      user_email: 'jane@example.com',
+      rating: 4,
+      comment: 'Great atmosphere and authentic Italian cuisine. The pasta was perfectly cooked. Only minor issue was the wait time, but it was worth it!',
+      created_at: '2024-01-10',
+      helpful_count: 8,
+    },
+    {
+      id: '3',
+      user_name: 'Mike Johnson',
+      user_email: 'mike@example.com',
+      rating: 5,
+      comment: 'Best Italian restaurant in town! Been coming here for years and they never disappoint. The staff is friendly and knows the menu inside out.',
+      created_at: '2024-01-05',
+      helpful_count: 15,
+    },
+  ];
+
   useEffect(() => {
     // Simulate API call
     const fetchRestaurant = async () => {
@@ -159,19 +211,101 @@ export function RestaurantDetailPage() {
       const found = featuredRestaurants.find(r => r.id === id);
       setRestaurant(found || null);
       setMenuItems(mockMenuItems);
+      setReviews(mockReviews);
       setLoading(false);
     };
 
     fetchRestaurant();
   }, [id]);
 
-  const renderStars = (rating: number) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      alert('Please sign in to leave a review');
+      return;
+    }
+
+    if (newReview.comment.trim().length < 10) {
+      alert('Review must be at least 10 characters long');
+      return;
+    }
+
+    setSubmittingReview(true);
+
+    try {
+      // TODO: Implement Supabase integration
+      const review: Review = {
+        id: Date.now().toString(),
+        user_name: user.email?.split('@')[0] || 'Anonymous',
+        user_email: user.email || '',
+        rating: newReview.rating,
+        comment: newReview.comment,
+        created_at: new Date().toISOString().split('T')[0],
+        helpful_count: 0,
+      };
+
+      // Add review to list
+      setReviews([review, ...reviews]);
+      
+      // Reset form
+      setNewReview({ rating: 5, comment: '' });
+      setShowReviewForm(false);
+      
+      // Update restaurant rating (simple average)
+      if (restaurant) {
+        const allRatings = [...reviews.map(r => r.rating), review.rating];
+        const avgRating = allRatings.reduce((a, b) => a + b, 0) / allRatings.length;
+        setRestaurant({ ...restaurant, rating: Math.round(avgRating * 10) / 10 });
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Failed to submit review. Please try again.');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleHelpful = (reviewId: string) => {
+    setReviews(reviews.map(review => 
+      review.id === reviewId 
+        ? { ...review, helpful_count: review.helpful_count + 1 }
+        : review
+    ));
+  };
+
+  const renderStars = (rating: number, interactive = false, size = 'default') => {
+    const sizeClass = size === 'large' ? 'h-8 w-8' : 'h-5 w-5';
+    
+    if (interactive) {
+      return (
+        <div className="flex items-center space-x-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setNewReview({ ...newReview, rating: star })}
+              className="focus:outline-none"
+            >
+              <Star
+                className={`${sizeClass} transition-colors ${
+                  star <= newReview.rating
+                    ? 'text-yellow-400 fill-current'
+                    : 'text-gray-300'
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+      );
+    }
+
     return (
       <div className="flex items-center">
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`h-5 w-5 ${
+            className={`${sizeClass} ${
               i < Math.floor(rating)
                 ? 'text-yellow-400 fill-current'
                 : i < rating
@@ -180,7 +314,7 @@ export function RestaurantDetailPage() {
             }`}
           />
         ))}
-        <span className="ml-2 text-lg font-medium text-gray-700">{rating}</span>
+        {rating && <span className="ml-2 text-lg font-medium text-gray-700">{rating}</span>}
       </div>
     );
   };
@@ -199,6 +333,8 @@ export function RestaurantDetailPage() {
       </div>
     );
   };
+
+  const userHasReviewed = user && reviews.some(review => review.user_email === user.email);
 
   if (loading) {
     return (
@@ -261,6 +397,7 @@ export function RestaurantDetailPage() {
                   </h1>
                   <div className="flex items-center space-x-4 mb-4">
                     {renderStars(restaurant.rating)}
+                    <span className="text-gray-600">({reviews.length} reviews)</span>
                     <span className="text-gray-400">•</span>
                     {renderPriceRange(restaurant.price_range)}
                     <span className="text-gray-400">•</span>
@@ -346,7 +483,7 @@ export function RestaurantDetailPage() {
         </div>
 
         {/* Menu Items Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {filteredMenuItems.map(item => (
             <Card key={item.id} hover>
               {item.image_url && (
@@ -370,6 +507,158 @@ export function RestaurantDetailPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Reviews Section */}
+        <div id="reviews" className="mt-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Customer Reviews</h2>
+              <p className="text-gray-600 mt-2">
+                {reviews.length} review{reviews.length !== 1 ? 's' : ''} • Average rating: {restaurant.rating}
+              </p>
+            </div>
+            {user && !userHasReviewed && !showReviewForm && (
+              <Button onClick={() => setShowReviewForm(true)}>
+                Write a Review
+              </Button>
+            )}
+          </div>
+
+          {/* Login prompt for non-authenticated users */}
+          {!user && (
+            <Card className="mb-8 border-orange-200 bg-orange-50">
+              <CardContent className="p-6 text-center">
+                <p className="text-gray-700 mb-4">
+                  Want to share your experience? Sign in to leave a review!
+                </p>
+                <Link to="/auth">
+                  <Button>Sign In to Review</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Already reviewed message */}
+          {user && userHasReviewed && !showReviewForm && (
+            <Card className="mb-8 border-green-200 bg-green-50">
+              <CardContent className="p-6">
+                <p className="text-green-800">
+                  ✓ Thank you for your review! You can see it below.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Review Form */}
+          {showReviewForm && user && (
+            <Card className="mb-8">
+              <CardHeader>
+                <h3 className="text-xl font-semibold">Write Your Review</h3>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmitReview} className="space-y-6">
+                  {/* Rating */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Your Rating
+                    </label>
+                    {renderStars(newReview.rating, true, 'large')}
+                    <p className="text-sm text-gray-500 mt-2">
+                      Click on the stars to rate (1-5)
+                    </p>
+                  </div>
+
+                  {/* Comment */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Your Review
+                    </label>
+                    <textarea
+                      value={newReview.comment}
+                      onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                      rows={5}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="Share your experience with others..."
+                      required
+                      minLength={10}
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Minimum 10 characters ({newReview.comment.length}/10)
+                    </p>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex justify-end space-x-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowReviewForm(false);
+                        setNewReview({ rating: 5, comment: '' });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      loading={submittingReview}
+                      disabled={newReview.comment.trim().length < 10}
+                    >
+                      Submit Review
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Reviews List */}
+          <div className="space-y-6">
+            {reviews.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <p className="text-gray-500 text-lg mb-4">No reviews yet</p>
+                  <p className="text-gray-400">Be the first to share your experience!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              reviews.map(review => (
+                <Card key={review.id}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center space-x-3 mb-2">
+                          <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                            {review.user_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">{review.user_name}</p>
+                            <p className="text-sm text-gray-500">{review.created_at}</p>
+                          </div>
+                        </div>
+                      </div>
+                      {renderStars(review.rating)}
+                    </div>
+
+                    <p className="text-gray-700 mb-4 leading-relaxed">
+                      {review.comment}
+                    </p>
+
+                    <div className="flex items-center space-x-4 text-sm">
+                      <button
+                        onClick={() => handleHelpful(review.id)}
+                        className="flex items-center space-x-1 text-gray-600 hover:text-orange-500 transition-colors"
+                      >
+                        <ThumbsUp className="h-4 w-4" />
+                        <span>Helpful ({review.helpful_count})</span>
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
