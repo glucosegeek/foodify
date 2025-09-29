@@ -3,7 +3,7 @@ import { Link, useLocation, Outlet } from 'react-router-dom';
 import { LayoutDashboard, ListRestart as Restaurant, Menu, Settings, BarChart3, PlusCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 
-export function DashboardLayout() {
+export function DashboardLayout() {  // ← WAŻNE: "export" przed function
   const location = useLocation();
 
   const navigation = [
