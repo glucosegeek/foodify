@@ -537,10 +537,6 @@ export function FeaturedRestaurants() {
           {renderStars(restaurant.rating)}
         </div>
       </div>
-                      <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
-                        {renderStars(restaurant.rating)}
-                      </div>
-                    </div>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-3">
                         <h3
