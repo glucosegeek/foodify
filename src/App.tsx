@@ -17,13 +17,14 @@ function App() {
         <div className="min-h-screen bg-gray-50">
           <Header />
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/restaurant/:id" element={<RestaurantPage />} />
             
             {/* Customer Dashboard */}
             <Route
-              path="/dashboard/customer"
+              path="/dashboard/customer/*"
               element={
                 <ProtectedRoute>
                   <RoleBasedRoute allowedRoles={['CUSTOMER']}>
@@ -32,8 +33,8 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<div className="p-8"><h1 className="text-2xl font-bold">Customer Overview - Coming Soon</h1></div>} />
-              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Customer Profile - Coming Soon</h1></div>} />
+              <Route index element={<div className="p-8"><h1 className="text-2xl font-bold">Customer Dashboard - Coming Soon</h1></div>} />
+              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Profile - Coming Soon</h1></div>} />
               <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Activities - Coming Soon</h1></div>} />
               <Route path="following" element={<div className="p-8"><h1 className="text-2xl font-bold">Following - Coming Soon</h1></div>} />
               <Route path="favorites" element={<div className="p-8"><h1 className="text-2xl font-bold">Favorites - Coming Soon</h1></div>} />
@@ -43,7 +44,7 @@ function App() {
 
             {/* Restaurant Dashboard */}
             <Route
-              path="/dashboard/restaurant"
+              path="/dashboard/restaurant/*"
               element={
                 <ProtectedRoute>
                   <RoleBasedRoute allowedRoles={['RESTAURANT']}>
@@ -52,17 +53,17 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<div className="p-8"><h1 className="text-2xl font-bold">Restaurant Overview - Coming Soon</h1></div>} />
-              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Restaurant Profile - Coming Soon</h1></div>} />
-              <Route path="menu" element={<div className="p-8"><h1 className="text-2xl font-bold">Menu Management - Coming Soon</h1></div>} />
+              <Route index element={<div className="p-8"><h1 className="text-2xl font-bold">Restaurant Dashboard - Coming Soon</h1></div>} />
+              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Profile - Coming Soon</h1></div>} />
+              <Route path="menu" element={<div className="p-8"><h1 className="text-2xl font-bold">Menu - Coming Soon</h1></div>} />
               <Route path="reviews" element={<div className="p-8"><h1 className="text-2xl font-bold">Reviews - Coming Soon</h1></div>} />
               <Route path="followers" element={<div className="p-8"><h1 className="text-2xl font-bold">Followers - Coming Soon</h1></div>} />
               <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions - Coming Soon</h1></div>} />
-              <Route path="stats" element={<div className="p-8"><h1 className="text-2xl font-bold">Statistics - Coming Soon</h1></div>} />
+              <Route path="stats" element={<div className="p-8"><h1 className="text-2xl font-bold">Stats - Coming Soon</h1></div>} />
               <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings - Coming Soon</h1></div>} />
             </Route>
 
-            {/* Legacy redirect */}
+            {/* Redirect old /dashboard to role-specific */}
             <Route 
               path="/dashboard" 
               element={
