@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Star, MapPin, DollarSign, Filter, X, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 // SUPABASE: Temporarily commented out
 // import { supabase } from '../../lib/supabase';
 import { Card, CardContent } from '../ui/Card';
@@ -47,7 +48,7 @@ export function FeaturedRestaurants() {
     searchTerm: ''
   });
 
-  // Top 15 Featured Restaurants
+  // Top 10 Featured Restaurants
   const featuredRestaurants: Restaurant[] = [
     {
       id: '1',
@@ -206,6 +207,81 @@ export function FeaturedRestaurants() {
     ...featuredRestaurants,
     // Additional restaurants for search functionality
     {
+      id: '11',
+      name: 'Nonna\'s Kitchen',
+      description: 'Homestyle Italian comfort food in a cozy trattoria setting. Handmade pasta and wood-fired pizzas using traditional family recipes.',
+      cuisine_type: 'Italian',
+      location: 'Little Italy',
+      logo_url: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=400',
+      rating: 4.5,
+      price_range: '$$',
+      standout_dish: 'Homemade Lasagna with Meat Sauce',
+      phone: '(555) 123-4567',
+      website: 'https://nonnas-kitchen.com',
+      dietary_options: ['Vegetarian'],
+      dining_style: 'Casual'
+    },
+    {
+      id: '12',
+      name: 'Seoul Garden',
+      description: 'Modern Korean BBQ with premium cuts of meat and traditional banchan. Interactive grilling experience with authentic Korean flavors.',
+      cuisine_type: 'Korean',
+      location: 'Koreatown',
+      logo_url: 'https://images.pexels.com/photos/2456435/pexels-photo-2456435.jpeg?auto=compress&cs=tinysrgb&w=400',
+      rating: 4.7,
+      price_range: '$$$',
+      standout_dish: 'Galbi Short Ribs with Kimchi',
+      phone: '(555) 234-5678',
+      website: 'https://seoul-garden.com',
+      dietary_options: ['Vegetarian'],
+      dining_style: 'Casual'
+    },
+    {
+      id: '13',
+      name: 'Green Leaf Café',
+      description: 'Plant-based cuisine with locally-sourced organic ingredients. Creative vegan dishes that satisfy both vegans and omnivores alike.',
+      cuisine_type: 'Vegan',
+      location: 'Green District',
+      logo_url: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=400',
+      rating: 4.4,
+      price_range: '$$',
+      standout_dish: 'Jackfruit Carnitas Bowl',
+      phone: '(555) 345-6789',
+      website: 'https://greenleaf-cafe.com',
+      dietary_options: ['Vegetarian', 'Vegan', 'Gluten-free'],
+      dining_style: 'Fast-casual'
+    },
+    {
+      id: '14',
+      name: 'Ocean\'s Bounty',
+      description: 'Fresh seafood restaurant with daily catches and raw bar. Sustainable fishing practices and expert preparation of coastal favorites.',
+      cuisine_type: 'Seafood',
+      location: 'Waterfront',
+      logo_url: 'https://images.pexels.com/photos/1640771/pexels-photo-1640771.jpeg?auto=compress&cs=tinysrgb&w=400',
+      rating: 4.8,
+      price_range: '$$$$',
+      standout_dish: 'Lobster Thermidor with Champagne Sauce',
+      phone: '(555) 456-7890',
+      website: 'https://oceans-bounty.com',
+      dietary_options: ['Gluten-free'],
+      dining_style: 'Fine dining'
+    },
+    {
+      id: '15',
+      name: 'Café Parisien',
+      description: 'Charming French café with fresh pastries, artisanal coffee, and light lunch fare. Perfect for breakfast meetings or afternoon treats.',
+      cuisine_type: 'French',
+      location: 'Financial District',
+      logo_url: 'https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg?auto=compress&cs=tinysrgb&w=400',
+      rating: 4.2,
+      price_range: '$',
+      standout_dish: 'Croissant Benedict with Hollandaise',
+      phone: '(555) 567-8901',
+      website: 'https://cafe-parisien.com',
+      dietary_options: ['Vegetarian'],
+      dining_style: 'Fast-casual'
+    },
+    {
       id: '16',
       name: 'Pizza Corner',
       description: 'New York-style pizza with thin crust and fresh toppings. Family-friendly atmosphere with quick service.',
@@ -267,7 +343,7 @@ export function FeaturedRestaurants() {
         .from('restaurants')
         .select('*')
         .eq('is_featured', true)
-        .limit(15);
+        .limit(10);
 
       if (error) throw error;
       setTopRestaurants(data || []);
@@ -444,80 +520,81 @@ export function FeaturedRestaurants() {
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {topRestaurants.map((restaurant, index) => (
-                <Card
-                  key={restaurant.id}
-                  className="flex-none w-80 cursor-pointer group"
-                  hover
-                >
-                  <div className="relative">
-                    <img
-                      src={restaurant.logo_url}
-                      alt={restaurant.name}
-                      className="w-full h-48 object-cover rounded-t-xl"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-orange-500 text-white text-sm font-bold px-3 py-1 rounded-full">
-                        #{index + 1}
-                      </span>
-                    </div>
-                    <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
-                      {renderStars(restaurant.rating)}
-                    </div>
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <a
-                        className="text-xl font-bold text-gray-900 group-hover:text-orange-500 transition-colors hover:underline"
-                      >
-                        {restaurant.name}
-                      </a>
-                      <div className="flex flex-col items-end space-y-1">
-                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                          {restaurant.cuisine_type}
-                        </span>
-                        {renderPriceRange(restaurant.price_range)}
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-600 mb-3 text-sm line-clamp-3">
-                      {restaurant.description}
-                    </p>
-                    
-                    <div className="mb-3">
-                      <p className="text-sm font-medium text-gray-900 mb-1">Signature Dish:</p>
-                      <p className="text-sm text-orange-600 font-medium">{restaurant.standout_dish}</p>
-                    </div>
-
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center text-gray-500">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span>{restaurant.location}</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-500">{restaurant.phone}</span>
-                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                          {restaurant.dining_style}
+                <Link key={restaurant.id} to={`/restaurant/${restaurant.id}`}>
+                  <Card
+                    className="flex-none w-80 cursor-pointer group"
+                    hover
+                  >
+                    <div className="relative">
+                      <img
+                        src={restaurant.logo_url}
+                        alt={restaurant.name}
+                        className="w-full h-48 object-cover rounded-t-xl"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <span className="bg-orange-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                          #{index + 1}
                         </span>
                       </div>
+                      <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
+                        {renderStars(restaurant.rating)}
+                      </div>
                     </div>
-
-                    {restaurant.dietary_options.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <div className="flex flex-wrap gap-1">
-                          {restaurant.dietary_options.map(option => (
-                            <span
-                              key={option}
-                              className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full"
-                            >
-                              {option}
-                            </span>
-                          ))}
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3
+                          className="text-xl font-bold text-gray-900 group-hover:text-orange-500 transition-colors hover:underline"
+                        >
+                          {restaurant.name}
+                        </h3>
+                        <div className="flex flex-col items-end space-y-1">
+                          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                            {restaurant.cuisine_type}
+                          </span>
+                          {renderPriceRange(restaurant.price_range)}
                         </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      
+                      <p className="text-gray-600 mb-3 text-sm line-clamp-3">
+                        {restaurant.description}
+                      </p>
+                      
+                      <div className="mb-3">
+                        <p className="text-sm font-medium text-gray-900 mb-1">Signature Dish:</p>
+                        <p className="text-sm text-orange-600 font-medium">{restaurant.standout_dish}</p>
+                      </div>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center text-gray-500">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          <span>{restaurant.location}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">{restaurant.phone}</span>
+                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                            {restaurant.dining_style}
+                          </span>
+                        </div>
+                      </div>
+
+                      {restaurant.dietary_options.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="flex flex-wrap gap-1">
+                            {restaurant.dietary_options.map(option => (
+                              <span
+                                key={option}
+                                className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full"
+                              >
+                                {option}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
@@ -696,74 +773,73 @@ export function FeaturedRestaurants() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredRestaurants.map((restaurant) => (
-                    <Card key={restaurant.id} className="cursor-pointer group" hover>
-                      <div className="relative">
-                        <img
-                          src={restaurant.logo_url}
-                          alt={restaurant.name}
-                          className="w-full h-48 object-cover rounded-t-xl"
-                        />
-                        <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
-                          {renderStars(restaurant.rating)}
-                        </div>
-                      </div>
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <a
-                            href={restaurant.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xl font-bold text-gray-900 group-hover:text-orange-500 transition-colors hover:underline"
-                          >
-                            {restaurant.name}
-                          </a>
-                          <div className="flex flex-col items-end space-y-1">
-                            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                              {restaurant.cuisine_type}
-                            </span>
-                            {renderPriceRange(restaurant.price_range)}
+                    <Link key={restaurant.id} to={`/restaurant/${restaurant.id}`}>
+                      <Card className="cursor-pointer group" hover>
+                        <div className="relative">
+                          <img
+                            src={restaurant.logo_url}
+                            alt={restaurant.name}
+                            className="w-full h-48 object-cover rounded-t-xl"
+                          />
+                          <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
+                            {renderStars(restaurant.rating)}
                           </div>
                         </div>
-                        
-                        <p className="text-gray-600 mb-3 text-sm line-clamp-2">
-                          {restaurant.description}
-                        </p>
-                        
-                        <div className="mb-3">
-                          <p className="text-sm font-medium text-gray-900 mb-1">Signature Dish:</p>
-                          <p className="text-sm text-orange-600 font-medium">{restaurant.standout_dish}</p>
-                        </div>
-
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center text-gray-500">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span>{restaurant.location}</span>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-500">{restaurant.phone}</span>
-                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                              {restaurant.dining_style}
-                            </span>
-                          </div>
-                        </div>
-
-                        {restaurant.dietary_options.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-gray-100">
-                            <div className="flex flex-wrap gap-1">
-                              {restaurant.dietary_options.map(option => (
-                                <span
-                                  key={option}
-                                  className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full"
-                                >
-                                  {option}
-                                </span>
-                              ))}
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-3">
+                            <h3
+                              className="text-xl font-bold text-gray-900 group-hover:text-orange-500 transition-colors hover:underline"
+                            >
+                              {restaurant.name}
+                            </h3>
+                            <div className="flex flex-col items-end space-y-1">
+                              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                                {restaurant.cuisine_type}
+                              </span>
+                              {renderPriceRange(restaurant.price_range)}
                             </div>
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                          
+                          <p className="text-gray-600 mb-3 text-sm line-clamp-2">
+                            {restaurant.description}
+                          </p>
+                          
+                          <div className="mb-3">
+                            <p className="text-sm font-medium text-gray-900 mb-1">Signature Dish:</p>
+                            <p className="text-sm text-orange-600 font-medium">{restaurant.standout_dish}</p>
+                          </div>
+
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center text-gray-500">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              <span>{restaurant.location}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-500">{restaurant.phone}</span>
+                              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                {restaurant.dining_style}
+                              </span>
+                            </div>
+                          </div>
+
+                          {restaurant.dietary_options.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-100">
+                              <div className="flex flex-wrap gap-1">
+                                {restaurant.dietary_options.map(option => (
+                                  <span
+                                    key={option}
+                                    className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full"
+                                  >
+                                    {option}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Link>
                   ))}
                 </div>
               )}
