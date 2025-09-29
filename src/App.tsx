@@ -7,31 +7,8 @@ import { AuthPage } from './pages/AuthPage';
 import { RestaurantPage } from './pages/RestaurantPage';
 import { CustomerDashboardLayout } from './components/dashboard/CustomerDashboardLayout';
 import { RestaurantDashboardLayout } from './components/dashboard/RestaurantDashboardLayout';
-import { AdminDashboardLayout } from './components/dashboard/AdminDashboardLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RoleBasedRoute } from './components/RoleBasedRoute';
-
-// Customer Dashboard Pages
-import { CustomerOverview } from './pages/dashboard/customer/CustomerOverview';
-import { CustomerProfile } from './pages/dashboard/customer/CustomerProfile';
-import { CustomerActivities } from './pages/dashboard/customer/CustomerActivities';
-import { CustomerFollowing } from './pages/dashboard/customer/CustomerFollowing';
-import { CustomerFavorites } from './pages/dashboard/customer/CustomerFavorites';
-import { CustomerNotifications } from './pages/dashboard/customer/CustomerNotifications';
-import { CustomerSettings } from './pages/dashboard/customer/CustomerSettings';
-
-// Restaurant Dashboard Pages
-import { RestaurantOverview } from './pages/dashboard/restaurant/RestaurantOverview';
-import { RestaurantProfile } from './pages/dashboard/restaurant/RestaurantProfile';
-import { RestaurantMenu } from './pages/dashboard/restaurant/RestaurantMenu';
-import { RestaurantReviews } from './pages/dashboard/restaurant/RestaurantReviews';
-import { RestaurantFollowers } from './pages/dashboard/restaurant/RestaurantFollowers';
-import { RestaurantPromotions } from './pages/dashboard/restaurant/RestaurantPromotions';
-import { RestaurantStats } from './pages/dashboard/restaurant/RestaurantStats';
-import { RestaurantSettings } from './pages/dashboard/restaurant/RestaurantSettings';
-
-// Admin Dashboard Pages
-import { AdminOverview } from './pages/dashboard/admin/AdminOverview';
 
 function App() {
   return (
@@ -55,13 +32,13 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<CustomerOverview />} />
-              <Route path="profile" element={<CustomerProfile />} />
-              <Route path="activities" element={<CustomerActivities />} />
-              <Route path="following" element={<CustomerFollowing />} />
-              <Route path="favorites" element={<CustomerFavorites />} />
-              <Route path="notifications" element={<CustomerNotifications />} />
-              <Route path="settings" element={<CustomerSettings />} />
+              <Route index element={<div className="p-8"><h1 className="text-2xl font-bold">Customer Overview - Coming Soon</h1></div>} />
+              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Customer Profile - Coming Soon</h1></div>} />
+              <Route path="activities" element={<div className="p-8"><h1 className="text-2xl font-bold">Activities - Coming Soon</h1></div>} />
+              <Route path="following" element={<div className="p-8"><h1 className="text-2xl font-bold">Following - Coming Soon</h1></div>} />
+              <Route path="favorites" element={<div className="p-8"><h1 className="text-2xl font-bold">Favorites - Coming Soon</h1></div>} />
+              <Route path="notifications" element={<div className="p-8"><h1 className="text-2xl font-bold">Notifications - Coming Soon</h1></div>} />
+              <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings - Coming Soon</h1></div>} />
             </Route>
 
             {/* Restaurant Dashboard */}
@@ -75,31 +52,17 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<RestaurantOverview />} />
-              <Route path="profile" element={<RestaurantProfile />} />
-              <Route path="menu" element={<RestaurantMenu />} />
-              <Route path="reviews" element={<RestaurantReviews />} />
-              <Route path="followers" element={<RestaurantFollowers />} />
-              <Route path="promotions" element={<RestaurantPromotions />} />
-              <Route path="stats" element={<RestaurantStats />} />
-              <Route path="settings" element={<RestaurantSettings />} />
+              <Route index element={<div className="p-8"><h1 className="text-2xl font-bold">Restaurant Overview - Coming Soon</h1></div>} />
+              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Restaurant Profile - Coming Soon</h1></div>} />
+              <Route path="menu" element={<div className="p-8"><h1 className="text-2xl font-bold">Menu Management - Coming Soon</h1></div>} />
+              <Route path="reviews" element={<div className="p-8"><h1 className="text-2xl font-bold">Reviews - Coming Soon</h1></div>} />
+              <Route path="followers" element={<div className="p-8"><h1 className="text-2xl font-bold">Followers - Coming Soon</h1></div>} />
+              <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions - Coming Soon</h1></div>} />
+              <Route path="stats" element={<div className="p-8"><h1 className="text-2xl font-bold">Statistics - Coming Soon</h1></div>} />
+              <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings - Coming Soon</h1></div>} />
             </Route>
 
-            {/* Admin Dashboard */}
-            <Route
-              path="/dashboard/admin"
-              element={
-                <ProtectedRoute>
-                  <RoleBasedRoute allowedRoles={['ADMIN']}>
-                    <AdminDashboardLayout />
-                  </RoleBasedRoute>
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<AdminOverview />} />
-            </Route>
-
-            {/* Legacy redirect - redirect old /dashboard to role-specific dashboard */}
+            {/* Legacy redirect */}
             <Route 
               path="/dashboard" 
               element={
