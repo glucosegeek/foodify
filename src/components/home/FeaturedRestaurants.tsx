@@ -486,7 +486,7 @@ export function FeaturedRestaurants() {
   return (
     <div className="bg-gray-50">
       {/* TOP 10 RESTAURANTS SECTION */}
-      <section className="py-16 bg-white border-b-4 border-orange-100">
+      <section id="top-restaurants" className="py-16 bg-white border-b-4 border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
