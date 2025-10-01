@@ -95,12 +95,13 @@ export function Header() {
             >
               Discover
             </Link>
-            <Link
-              to="/top-restaurants"
+            <a
+              href="/#top-restaurants"
+              onClick={handleTopRestaurantsClick}
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
             >
               Top Restaurants
-            </Link>
+            </a>
             {user && (
               <Link
                 to={getDashboardLink()}
