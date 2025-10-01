@@ -4,7 +4,7 @@ import { Button } from '../ui/Button';
 
 export function HeroSection() {
   return (
-    <section className="relative bg-gradient-to-br from-orange-500 via-orange-400 to-orange-600 text-white overflow-hidden">
+    <section id="discover" className="relative bg-gradient-to-br from-orange-500 via-orange-400 to-orange-600 text-white overflow-hidden scroll-mt-16">
       <div className="absolute inset-0 bg-black bg-opacity-20"></div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
         <div className="text-center">
