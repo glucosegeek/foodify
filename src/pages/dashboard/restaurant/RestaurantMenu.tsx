@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, Search, Filter, Eye, EyeOff, Star, Clock, DollarSign } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
-import { Input } from '../../../components/ui/Input';
+import React, { useEffect, useState } from 'react';
+import { Plus, Edit2, Trash2, Search, Filter, DollarSign } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface MenuItem {
@@ -11,445 +10,340 @@ interface MenuItem {
   description: string;
   price: number;
   category: string;
-  image_url?: string;
+  image_url: string | null;
   is_available: boolean;
-  is_signature: boolean;
-  is_seasonal: boolean;
-  spice_level: number;
-  preparation_time?: number;
-  popularity_rank: number;
+}
+
+interface FilterState {
+  category: string;
+  availability: string;
+  searchTerm: string;
 }
 
 export function RestaurantMenu() {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([
+  const { user } = useAuth();
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<FilterState>({
+    category: '',
+    availability: '',
+    searchTerm: ''
+  });
+
+  // Mock data for development (replace with actual API call)
+  const mockMenuItems: MenuItem[] = [
     {
       id: '1',
-      name: 'Truffle Risotto',
-      description: 'Creamy Arborio rice with black truffle, parmesan, and wild mushrooms',
-      price: 28.99,
-      category: 'Main Course',
-      image_url: 'https://images.unsplash.com/photo-1476124369491-b79d2e6b1b4c?w=400',
-      is_available: true,
-      is_signature: true,
-      is_seasonal: false,
-      spice_level: 0,
-      preparation_time: 25,
-      popularity_rank: 95
+      name: 'Margherita Pizza',
+      description: 'Fresh tomatoes, mozzarella, basil, and olive oil',
+      price: 12.99,
+      category: 'Pizza',
+      image_url: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=400',
+      is_available: true
     },
     {
       id: '2',
-      name: 'Margherita Pizza',
-      description: 'Classic pizza with San Marzano tomatoes, fresh mozzarella, and basil',
-      price: 16.99,
-      category: 'Pizza',
-      image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400',
-      is_available: true,
-      is_signature: false,
-      is_seasonal: false,
-      spice_level: 0,
-      preparation_time: 15,
-      popularity_rank: 88
+      name: 'Caesar Salad',
+      description: 'Romaine lettuce, parmesan, croutons, Caesar dressing',
+      price: 8.99,
+      category: 'Salads',
+      image_url: 'https://images.pexels.com/photos/1059905/pexels-photo-1059905.jpeg?auto=compress&cs=tinysrgb&w=400',
+      is_available: true
     },
     {
       id: '3',
-      name: 'Tiramisu',
-      description: 'Traditional Italian dessert with espresso-soaked ladyfingers and mascarpone',
-      price: 9.99,
-      category: 'Dessert',
-      is_available: true,
-      is_signature: true,
-      is_seasonal: false,
-      spice_level: 0,
-      preparation_time: 5,
-      popularity_rank: 92
-    }
-  ]);
-
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-
-  const [formData, setFormData] = useState<Partial<MenuItem>>({
-    name: '',
-    description: '',
-    price: 0,
-    category: 'Main Course',
-    is_available: true,
-    is_signature: false,
-    is_seasonal: false,
-    spice_level: 0,
-    preparation_time: 15
-  });
-
-  const categories = ['All', 'Appetizer', 'Main Course', 'Pizza', 'Pasta', 'Dessert', 'Beverage'];
-
-  const handleSaveItem = () => {
-    if (editingItem) {
-      setMenuItems(prev => prev.map(item =>
-        item.id === editingItem.id ? { ...item, ...formData } : item
-      ));
-      setEditingItem(null);
-    } else {
-      const newItem: MenuItem = {
-        id: Date.now().toString(),
-        ...formData,
-        popularity_rank: 50
-      } as MenuItem;
-      setMenuItems(prev => [...prev, newItem]);
-    }
-    resetForm();
-  };
-
-  const handleEditItem = (item: MenuItem) => {
-    setEditingItem(item);
-    setFormData(item);
-    setShowAddDialog(true);
-  };
-
-  const handleDeleteItem = (itemId: string) => {
-    if (window.confirm('Are you sure you want to delete this menu item?')) {
-      setMenuItems(prev => prev.filter(item => item.id !== itemId));
-    }
-  };
-
-  const toggleAvailability = (itemId: string) => {
-    setMenuItems(prev => prev.map(item =>
-      item.id === itemId ? { ...item, is_available: !item.is_available } : item
-    ));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: 0,
+      name: 'Grilled Salmon',
+      description: 'Atlantic salmon with seasonal vegetables',
+      price: 18.99,
       category: 'Main Course',
-      is_available: true,
-      is_signature: false,
-      is_seasonal: false,
-      spice_level: 0,
-      preparation_time: 15
+      image_url: 'https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=400',
+      is_available: false
+    },
+    {
+      id: '4',
+      name: 'Tiramisu',
+      description: 'Classic Italian dessert with coffee and mascarpone',
+      price: 6.99,
+      category: 'Desserts',
+      image_url: 'https://images.pexels.com/photos/1126359/pexels-photo-1126359.jpeg?auto=compress&cs=tinysrgb&w=400',
+      is_available: true
+    },
+    {
+      id: '5',
+      name: 'Spaghetti Carbonara',
+      description: 'Pasta with eggs, cheese, pancetta, and black pepper',
+      price: 14.99,
+      category: 'Pasta',
+      image_url: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=400',
+      is_available: true
+    }
+  ];
+
+  useEffect(() => {
+    fetchMenuItems();
+  }, [user]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [menuItems, filters]);
+
+  const fetchMenuItems = async () => {
+    try {
+      // SUPABASE: Replace with actual API call
+      // const { data, error } = await supabase
+      //   .from('menu_items')
+      //   .select('*')
+      //   .eq('restaurant_id', restaurantId);
+
+      // TEMPORARY: Using mock data
+      setMenuItems(mockMenuItems);
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
+    let filtered = menuItems;
+
+    if (filters.searchTerm) {
+      const searchLower = filters.searchTerm.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.name.toLowerCase().includes(searchLower) ||
+        item.description.toLowerCase().includes(searchLower) ||
+        item.category.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (filters.category) {
+      filtered = filtered.filter(item => item.category === filters.category);
+    }
+
+    if (filters.availability === 'available') {
+      filtered = filtered.filter(item => item.is_available);
+    } else if (filters.availability === 'unavailable') {
+      filtered = filtered.filter(item => !item.is_available);
+    }
+
+    setFilteredItems(filtered);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      category: '',
+      availability: '',
+      searchTerm: ''
     });
-    setShowAddDialog(false);
-    setEditingItem(null);
   };
 
-  const filteredItems = menuItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this menu item?')) {
+      return;
+    }
 
-  const stats = {
-    total: menuItems.length,
-    available: menuItems.filter(i => i.is_available).length,
-    signature: menuItems.filter(i => i.is_signature).length,
-    seasonal: menuItems.filter(i => i.is_seasonal).length
+    try {
+      // SUPABASE: Replace with actual API call
+      // await supabase.from('menu_items').delete().eq('id', id);
+      
+      setMenuItems(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting menu item:', error);
+    }
   };
 
-  return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Menu Management</h1>
-            <p className="text-gray-600 mt-2">Add, edit, and organize your menu items</p>
-          </div>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Menu Item
-          </Button>
-        </div>
+  const toggleAvailability = async (id: string, currentStatus: boolean) => {
+    try {
+      // SUPABASE: Replace with actual API call
+      // await supabase
+      //   .from('menu_items')
+      //   .update({ is_available: !currentStatus })
+      //   .eq('id', id);
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-gray-600 mb-1">Total Items</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-gray-600 mb-1">Available</p>
-              <p className="text-2xl font-bold text-green-600">{stats.available}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-gray-600 mb-1">Signature Dishes</p>
-              <p className="text-2xl font-bold text-orange-600">{stats.signature}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-gray-600 mb-1">Seasonal Items</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.seasonal}</p>
-            </CardContent>
-          </Card>
-        </div>
+      setMenuItems(prev => 
+        prev.map(item => 
+          item.id === id ? { ...item, is_available: !currentStatus } : item
+        )
+      );
+    } catch (error) {
+      console.error('Error updating availability:', error);
+    }
+  };
 
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search menu items..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          >
-            {categories.map(cat => (
-              <option key={cat} value={cat.toLowerCase()}>{cat}</option>
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded w-64 mb-8"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-300 rounded-xl"></div>
             ))}
-          </select>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {showAddDialog && (
-        <Card className="mb-6 border-2 border-orange-200">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {editingItem ? 'Edit Menu Item' : 'Add New Menu Item'}
-              </h3>
-              <Button variant="ghost" onClick={resetForm}>✕</Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Item Name *"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Margherita Pizza"
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category *
-                </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  {categories.filter(c => c !== 'All').map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
+  const categories = [...new Set(menuItems.map(item => item.category))];
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Menu Management</h1>
+          <p className="text-gray-600 mt-2">
+            Manage your restaurant's menu items and availability
+          </p>
+        </div>
+        <Button size="lg" className="flex items-center space-x-2">
+          <Plus className="h-5 w-5" />
+          <span>Add Menu Item</span>
+        </Button>
+      </div>
+
+      {/* Filters Section */}
+      <Card className="mb-8">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search Menu Items
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Search by name, description, or category..."
+                  value={filters.searchTerm}
+                  onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                Category
               </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Describe your dish..."
-              />
+              <select
+                value={filters.category}
+                onChange={(e) => setFilters({...filters, category: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+              >
+                <option value="">All Categories</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <Input
-                label="Price ($) *"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                placeholder="0.00"
-              />
-              <Input
-                label="Prep Time (min)"
-                type="number"
-                value={formData.preparation_time}
-                onChange={(e) => setFormData({ ...formData, preparation_time: parseInt(e.target.value) })}
-                placeholder="15"
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Spice Level
-                </label>
-                <select
-                  value={formData.spice_level}
-                  onChange={(e) => setFormData({ ...formData, spice_level: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value={0}>None</option>
-                  <option value={1}>Mild 🌶️</option>
-                  <option value={2}>Medium 🌶️🌶️</option>
-                  <option value={3}>Hot 🌶️🌶️🌶️</option>
-                </select>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Availability
+              </label>
+              <select
+                value={filters.availability}
+                onChange={(e) => setFilters({...filters, availability: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+              >
+                <option value="">All Items</option>
+                <option value="available">Available Only</option>
+                <option value="unavailable">Unavailable Only</option>
+              </select>
+            </div>
+          </div>
+
+          {(filters.searchTerm || filters.category || filters.availability) && (
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                Showing {filteredItems.length} of {menuItems.length} items
+              </p>
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                Clear Filters
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Menu Items Grid */}
+      {filteredItems.length === 0 ? (
+        <div className="text-center py-12">
+          <Filter className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+          <p className="text-gray-500 text-lg mb-4">No menu items match your filters.</p>
+          <Button variant="outline" onClick={clearFilters}>
+            Clear All Filters
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredItems.map((item) => (
+            <Card key={item.id} className="cursor-pointer group" hover>
+              <div className="relative">
+                <img
+                  src={item.image_url || 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400'}
+                  alt={item.name}
+                  className="w-full h-48 object-cover rounded-t-xl"
+                />
+                <div className="absolute top-4 right-4">
+                  <button
+                    onClick={() => toggleAvailability(item.id, item.is_available)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      item.is_available
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {item.is_available ? 'Available' : 'Unavailable'}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center space-x-6">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.is_available}
-                  onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
-                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                />
-                <span className="text-sm text-gray-700">Available</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.is_signature}
-                  onChange={(e) => setFormData({ ...formData, is_signature: e.target.checked })}
-                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                />
-                <span className="text-sm text-gray-700">Signature Dish</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.is_seasonal}
-                  onChange={(e) => setFormData({ ...formData, is_seasonal: e.target.checked })}
-                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                />
-                <span className="text-sm text-gray-700">Seasonal Item</span>
-              </label>
-            </div>
-
-            <div className="flex space-x-3 pt-4">
-              <Button onClick={handleSaveItem} disabled={!formData.name || !formData.price}>
-                {editingItem ? 'Update Item' : 'Add Item'}
-              </Button>
-              <Button variant="outline" onClick={resetForm}>
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
-          <Card key={item.id} className={`hover:shadow-lg transition-shadow ${!item.is_available ? 'opacity-60' : ''}`}>
-            <CardContent className="p-0">
-              {item.image_url && (
-                <div className="relative h-48">
-                  <img
-                    src={item.image_url}
-                    alt={item.name}
-                    className="w-full h-full object-cover rounded-t-xl"
-                  />
-                  <div className="absolute top-2 right-2 flex space-x-1">
-                    {item.is_signature && (
-                      <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
-                        <Star className="h-3 w-3 mr-1 fill-current" />
-                        Signature
-                      </span>
-                    )}
-                    {item.is_seasonal && (
-                      <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                        Seasonal
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-2">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg">{item.name}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{item.category}</p>
-                  </div>
-                  <p className="text-lg font-bold text-orange-600">${item.price.toFixed(2)}</p>
-                </div>
-
-                <p className="text-sm text-gray-700 mb-3 line-clamp-2">{item.description}</p>
-
-                <div className="flex items-center space-x-4 text-xs text-gray-600 mb-3">
-                  {item.preparation_time && (
-                    <span className="flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {item.preparation_time} min
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      {item.name}
+                    </h3>
+                    <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                      {item.category}
                     </span>
-                  )}
-                  {item.spice_level > 0 && (
-                    <span>{'🌶️'.repeat(item.spice_level)}</span>
-                  )}
-                  <span className="flex items-center">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    {item.popularity_rank}% popular
-                  </span>
+                  </div>
+                  <div className="flex items-center text-green-600 font-bold text-lg ml-2">
+                    <DollarSign className="h-5 w-5" />
+                    {item.price.toFixed(2)}
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  {item.description}
+                </p>
+
+                <div className="flex space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toggleAvailability(item.id)}
-                    className="flex-1"
-                  >
-                    {item.is_available ? (
-                      <>
-                        <Eye className="h-3 w-3 mr-1" />
-                        Available
-                      </>
-                    ) : (
-                      <>
-                        <EyeOff className="h-3 w-3 mr-1" />
-                        Unavailable
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditItem(item)}
+                    className="flex-1 flex items-center justify-center space-x-1"
                   >
                     <Edit2 className="h-4 w-4" />
+                    <span>Edit</span>
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDeleteItem(item.id)}
+                    onClick={() => handleDelete(item.id)}
+                    className="flex-1 flex items-center justify-center space-x-1 text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                    <Trash2 className="h-4 w-4" />
+                    <span>Delete</span>
                   </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredItems.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No items found
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {searchQuery || categoryFilter !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Add your first menu item to get started'}
-            </p>
-            {!searchQuery && categoryFilter === 'all' && (
-              <Button onClick={() => setShowAddDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Menu Item
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );
