@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
+import { RestaurantDetailPage } from './pages/RestaurantDetailPage';
 import { RoleGuard } from './components/RoleGuard';
 
 // Dashboard Layouts
@@ -51,6 +52,7 @@ function App() {
             {/* Public routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
 
             {/* Dashboard redirect */}
             <Route
