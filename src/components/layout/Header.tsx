@@ -25,12 +25,18 @@ export function Header() {
     if (location.pathname === '/') {
       // Already on home page, just scroll
       const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
+if (element) {
+  const header = document.querySelector('header');
+  const headerHeight = header?.offsetHeight || 64;
+  
+  const elementPosition = element.getBoundingClientRect().top;
+  const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+  
+  window.scrollTo({
+    top: offsetPosition,
+    behavior: 'smooth'
+  });
+}
     } else {
       // Navigate to home page with hash
       navigate(`/#${sectionId}`);
