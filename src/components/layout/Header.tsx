@@ -18,18 +18,22 @@ export function Header() {
     }
   };
 
-  const handleTopRestaurantsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-   e.preventDefault();
+  // Generic handler for section-based navigation
+  const handleSectionClick = (sectionId: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
     
     if (location.pathname === '/') {
       // Already on home page, just scroll
-      document.getElementById('top-restaurants')?.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
     } else {
       // Navigate to home page with hash
-      navigate('/#top-restaurants');
+      navigate(`/#${sectionId}`);
       // Scroll will happen after navigation via useEffect in HomePage
     }
   };
@@ -37,6 +41,7 @@ export function Header() {
   const getDashboardLink = () => {
     if (!user) return '/dashboard';
 
+    // @ts-ignore - role will be added when Supabase is integrated
     switch (user.role) {
       case 'CUSTOMER':
         return '/dashboard/customer';
@@ -52,6 +57,7 @@ export function Header() {
   const getRoleIcon = () => {
     if (!user) return User;
     
+    // @ts-ignore - role will be added when Supabase is integrated
     switch (user.role) {
       case 'RESTAURANT':
         return Store;
@@ -65,6 +71,7 @@ export function Header() {
   const getRoleLabel = () => {
     if (!user) return '';
     
+    // @ts-ignore - role will be added when Supabase is integrated
     switch (user.role) {
       case 'CUSTOMER':
         return 'Customer';
@@ -98,7 +105,7 @@ export function Header() {
             </a>
             <a
               href="/#top-restaurants"
-              onClick={handleTopRestaurantsClick}
+              onClick={handleSectionClick('top-restaurants')}
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
             >
               Top Restaurants
