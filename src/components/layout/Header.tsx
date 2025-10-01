@@ -18,6 +18,22 @@ export function Header() {
     }
   };
 
+  const handleTopRestaurantsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+   e.preventDefault();
+    
+    if (location.pathname === '/') {
+      // Already on home page, just scroll
+      document.getElementById('top-restaurants')?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    } else {
+      // Navigate to home page with hash
+      navigate('/#top-restaurants');
+      // Scroll will happen after navigation via useEffect in HomePage
+    }
+  };
+
   const getDashboardLink = () => {
     if (!user) return '/dashboard';
 
