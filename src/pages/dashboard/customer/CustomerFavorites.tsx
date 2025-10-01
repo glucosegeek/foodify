@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Star, MapPin, Plus, Edit2, Trash2, Lock, Globe, ExternalLink } from 'lucide-react';
+import { Heart, Star, MapPin, Plus, CreditCard as Edit2, Trash2, Lock, Globe, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { mockFavoriteLists, FavoriteList } from '../../../data/mockCustomerData';
