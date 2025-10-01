@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
@@ -10,8 +10,6 @@ import { RoleGuard } from './components/RoleGuard';
 // Dashboard Layouts
 import { CustomerDashboardLayout } from './components/dashboard/CustomerDashboardLayout';
 import { RestaurantDashboardLayout } from './components/dashboard/RestaurantDashboardLayout';
-import { DashboardLayout } from './components/dashboard/DashboardLayout';
-import { DashboardOverview } from './pages/dashboard/DashboardOverview';
 
 // Customer Pages
 import {
@@ -35,13 +33,25 @@ import {
   RestaurantSettings
 } from './pages/dashboard/restaurant';
 
-// Placeholder components (zostaną zastąpione rzeczywistymi komponentami)
-const PlaceholderPage = ({ title }: { title: string }) => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-    <p className="text-gray-600 mt-2">This page is under construction.</p>
-  </div>
-);
+// Dashboard redirect component
+function DashboardRedirect() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  switch (user.role) {
+    case 'CUSTOMER':
+      return <Navigate to="/dashboard/customer/overview" replace />;
+    case 'RESTAURANT':
+      return <Navigate to="/dashboard/restaurant/profile" replace />;
+    case 'ADMIN':
+      return <Navigate to="/dashboard/customer/overview" replace />;
+    default:
+      return <Navigate to="/" replace />;
+  }
+}
 
 function App() {
   return (
@@ -55,25 +65,15 @@ function App() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
 
-            {/* Dashboard redirect */}
+            {/* Dashboard redirect - routes to role-based dashboard */}
             <Route
               path="/dashboard"
               element={
-                <Navigate to="/dashboard/overview" replace />
-              }
-            />
-
-            {/* Old dashboard overview (for backward compatibility) */}
-            <Route
-              path="/dashboard/overview"
-              element={
                 <RoleGuard allowedRoles={['CUSTOMER', 'RESTAURANT', 'ADMIN']}>
-                  <DashboardLayout />
+                  <DashboardRedirect />
                 </RoleGuard>
               }
-            >
-              <Route index element={<DashboardOverview />} />
-            </Route>
+            />
 
             {/* Customer Dashboard */}
             <Route
@@ -113,12 +113,6 @@ function App() {
               <Route path="settings" element={<RestaurantSettings />} />
             </Route>
 
-            {/* Fallback routes for unavailable pages */}
-            <Route path="/dashboard/profile" element={<PlaceholderPage title="Restaurant Profile - Coming Soon" />} />
-            <Route path="/dashboard/menu" element={<PlaceholderPage title="Menu Management - Coming Soon" />} />
-            <Route path="/dashboard/menu/add" element={<PlaceholderPage title="Add Menu Item - Coming Soon" />} />
-            <Route path="/dashboard/analytics" element={<PlaceholderPage title="Analytics - Coming Soon" />} />
-            <Route path="/dashboard/settings" element={<PlaceholderPage title="Settings - Coming Soon" />} />
 
             {/* 404 route */}
             <Route path="*" element={<Navigate to="/" replace />} />

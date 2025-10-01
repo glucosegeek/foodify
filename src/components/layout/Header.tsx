@@ -19,14 +19,14 @@ export function Header() {
 
   const getDashboardLink = () => {
     if (!user) return '/dashboard';
-    
+
     switch (user.role) {
       case 'CUSTOMER':
         return '/dashboard/customer';
       case 'RESTAURANT':
         return '/dashboard/restaurant';
       case 'ADMIN':
-        return '/dashboard/overview';
+        return '/dashboard/customer';
       default:
         return '/dashboard';
     }
