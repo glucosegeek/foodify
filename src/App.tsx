@@ -14,13 +14,14 @@ import { DashboardLayout } from './components/dashboard/DashboardLayout';
 import { DashboardOverview } from './pages/dashboard/DashboardOverview';
 
 // Customer Pages
-import { 
-  CustomerProfile, 
-  CustomerActivities, 
-  CustomerFollowing, 
-  CustomerFavorites, 
-  CustomerNotifications, 
-  CustomerSettings 
+import {
+  CustomerProfile,
+  CustomerActivities,
+  CustomerFollowing,
+  CustomerFavorites,
+  CustomerNotifications,
+  CustomerSettings,
+  CustomerOverview
 } from './pages/dashboard/customer';
 
 // Restaurant Pages
@@ -83,7 +84,8 @@ function App() {
                 </RoleGuard>
               }
             >
-              <Route index element={<Navigate to="/dashboard/customer/profile" replace />} />
+              <Route index element={<Navigate to="/dashboard/customer/overview" replace />} />
+              <Route path="overview" element={<CustomerOverview />} />
               <Route path="profile" element={<CustomerProfile />} />
               <Route path="activities" element={<CustomerActivities />} />
               <Route path="following" element={<CustomerFollowing />} />

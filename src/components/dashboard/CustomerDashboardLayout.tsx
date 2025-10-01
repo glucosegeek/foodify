@@ -16,43 +16,43 @@ export function CustomerDashboardLayout() {
 
   const navigation = [
     {
-      name: 'Przegląd',
-      href: '/dashboard/customer',
+      name: 'Overview',
+      href: '/dashboard/customer/overview',
       icon: Home,
-      current: location.pathname === '/dashboard/customer',
+      current: location.pathname === '/dashboard/customer' || location.pathname === '/dashboard/customer/overview',
     },
     {
-      name: 'Mój Profil',
+      name: 'My Profile',
       href: '/dashboard/customer/profile',
       icon: User,
       current: location.pathname === '/dashboard/customer/profile',
     },
     {
-      name: 'Moje Aktywności',
+      name: 'My Activities',
       href: '/dashboard/customer/activities',
       icon: Activity,
       current: location.pathname === '/dashboard/customer/activities',
     },
     {
-      name: 'Obserwowane',
+      name: 'Following',
       href: '/dashboard/customer/following',
       icon: Users,
       current: location.pathname === '/dashboard/customer/following',
     },
     {
-      name: 'Ulubione',
+      name: 'Favorites',
       href: '/dashboard/customer/favorites',
       icon: Heart,
       current: location.pathname === '/dashboard/customer/favorites',
     },
     {
-      name: 'Powiadomienia',
+      name: 'Notifications',
       href: '/dashboard/customer/notifications',
       icon: Bell,
       current: location.pathname === '/dashboard/customer/notifications',
     },
     {
-      name: 'Ustawienia',
+      name: 'Settings',
       href: '/dashboard/customer/settings',
       icon: Settings,
       current: location.pathname === '/dashboard/customer/settings',
@@ -66,8 +66,8 @@ export function CustomerDashboardLayout() {
         <div className="w-64 bg-white shadow-lg">
           <div className="flex flex-col h-full">
             <div className="px-6 py-8">
-              <h2 className="text-2xl font-bold text-gray-900">Panel Klienta</h2>
-              <p className="text-sm text-gray-600 mt-2">Zarządzaj swoim profilem</p>
+              <h2 className="text-2xl font-bold text-gray-900">Customer Dashboard</h2>
+              <p className="text-sm text-gray-600 mt-2">Manage your profile</p>
             </div>
             
             <nav className="flex-1 px-6 pb-6">
