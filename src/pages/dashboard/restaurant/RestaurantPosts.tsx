@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Megaphone, Calendar, Image, Edit2, Trash2, Eye } from 'lucide-react';
+import { Plus, Megaphone, Calendar, Image, CreditCard as Edit2, Trash2, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
