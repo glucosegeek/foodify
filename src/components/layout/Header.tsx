@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ChefHat, User, LogOut, Settings, Shield, Store } from 'lucide-react';
+import { ChefHat, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 
@@ -8,7 +8,7 @@ export function Header() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -18,66 +18,24 @@ export function Header() {
     }
   };
 
-  const handleTopRestaurantsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-   e.preventDefault();
+  const handleSectionClick = (sectionId: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
     
     if (location.pathname === '/') {
       // Already on home page, just scroll
-      document.getElementById('top-restaurants')?.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
     } else {
       // Navigate to home page with hash
-      navigate('/#top-restaurants');
+      navigate(`/#${sectionId}`);
       // Scroll will happen after navigation via useEffect in HomePage
     }
   };
-
-  const getDashboardLink = () => {
-    if (!user) return '/dashboard';
-
-    switch (user.role) {
-      case 'CUSTOMER':
-        return '/dashboard/customer';
-      case 'RESTAURANT':
-        return '/dashboard/restaurant';
-      case 'ADMIN':
-        return '/dashboard/customer';
-      default:
-        return '/dashboard';
-    }
-  };
-
-  const getRoleIcon = () => {
-    if (!user) return User;
-    
-    switch (user.role) {
-      case 'RESTAURANT':
-        return Store;
-      case 'ADMIN':
-        return Shield;
-      default:
-        return User;
-    }
-  };
-
-  const getRoleLabel = () => {
-    if (!user) return '';
-    
-    switch (user.role) {
-      case 'CUSTOMER':
-        return 'Customer';
-      case 'RESTAURANT':
-        return 'Restaurant';
-      case 'ADMIN':
-        return 'Admin';
-      default:
-        return '';
-    }
-  };
-
-  const RoleIcon = getRoleIcon();
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
@@ -89,22 +47,23 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/"
+            
+              href="/#discover"
+              onClick={handleSectionClick('discover')}
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
             >
               Discover
-            </Link>
-            <a
+            </a>
+            
               href="/#top-restaurants"
-              onClick={handleTopRestaurantsClick}
+              onClick={handleSectionClick('top-restaurants')}
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
             >
               Top Restaurants
             </a>
             {user && (
               <Link
-                to={getDashboardLink()}
+                to="/dashboard"
                 className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
               >
                 Dashboard
@@ -114,26 +73,13 @@ export function Header() {
 
           <div className="flex items-center space-x-4">
             {user ? (
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
-                  <RoleIcon className="h-4 w-4 text-gray-500" />
-                  <div className="hidden sm:block">
-                    <span className="text-xs text-gray-500 uppercase font-medium">
-                      {getRoleLabel()}
-                    </span>
-                    <div className="text-sm text-gray-700 font-medium">
-                      {user.email}
-                    </div>
-                  </div>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  <User className="h-5 w-5 text-gray-500" />
+                  <span className="text-sm text-gray-600 hidden sm:inline">
+                    {user.email}
+                  </span>
                 </div>
-                
-                <Link to={getDashboardLink()}>
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-1">
-                    <Settings className="h-4 w-4" />
-                    <span className="hidden sm:inline">Dashboard</span>
-                  </Button>
-                </Link>
-                
                 <Button
                   variant="ghost"
                   size="sm"
