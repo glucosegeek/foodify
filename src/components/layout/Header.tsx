@@ -7,7 +7,8 @@ import { Button } from '../ui/Button';
 export function Header() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-
+  const location = useLocation();
+  
   const handleSignOut = async () => {
     try {
       await signOut();
