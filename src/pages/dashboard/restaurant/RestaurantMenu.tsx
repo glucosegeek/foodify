@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, Search, Filter, DollarSign } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from 'react';
+import { Plus, CreditCard as Edit2, Trash2, Search, Filter, Eye, EyeOff, Star, Clock, DollarSign } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
+import { Input } from '../../../components/ui/Input';
 
 interface MenuItem {
   id: string;
