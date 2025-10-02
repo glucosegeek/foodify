@@ -93,7 +93,6 @@ export function RestaurantMenu() {
     if (!files) return;
 
     Array.from(files).forEach(file => {
-      // Validate file type
       const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
       if (!validTypes.includes(file.type)) {
         alert(`Invalid file type: ${file.name}. Only PDF, JPG, and PNG files are allowed.`);
@@ -144,7 +143,6 @@ export function RestaurantMenu() {
         <p className="text-gray-600 mt-2">Manage your menu items or upload menu files (PDF, JPG, PNG)</p>
       </div>
 
-      {/* Toggle between Items and Files */}
       <div className="flex space-x-2 mb-6">
         <button
           onClick={() => setUploadMode('items')}
@@ -170,7 +168,6 @@ export function RestaurantMenu() {
         </button>
       </div>
 
-      {/* Upload Files Section */}
       {uploadMode === 'files' && (
         <>
           <Card className="mb-6">
@@ -213,7 +210,6 @@ export function RestaurantMenu() {
             </CardContent>
           </Card>
 
-          {/* Uploaded Files List */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900">Uploaded Menu Files</h2>
             {menuFiles.length === 0 ? (
@@ -259,14 +255,18 @@ export function RestaurantMenu() {
                           <Eye className="h-3 w-3 mr-1" />
                           Preview
                         </button>
-                        
-                          href={file.url}
-                          download={file.name}
+                        <button
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = file.url;
+                            link.download = file.name;
+                            link.click();
+                          }}
                           className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
                         >
                           <Download className="h-3 w-3 mr-1" />
                           Download
-                        </a>
+                        </button>
                         <button
                           onClick={() => handleDeleteFile(file.id)}
                           className="px-3 py-2 text-sm font-medium text-red-600 bg-white border border-gray-300 rounded-lg hover:bg-red-50 transition-colors"
@@ -283,7 +283,6 @@ export function RestaurantMenu() {
         </>
       )}
 
-      {/* Menu Items Section */}
       {uploadMode === 'items' && (
         <>
           <div className="flex justify-between items-center mb-6">
