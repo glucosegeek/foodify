@@ -204,10 +204,10 @@ export function RestaurantMenu() {
                   className="hidden"
                 />
                 <label htmlFor="menu-file-upload">
-                  <Button variant="primary" size="lg" className="cursor-pointer">
+                  <span className="inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors cursor-pointer">
                     <Upload className="h-4 w-4 mr-2" />
                     Choose Files
-                  </Button>
+                  </span>
                 </label>
               </div>
             </CardContent>
@@ -252,35 +252,27 @@ export function RestaurantMenu() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 mt-4">
-                        
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1"
+                        <button
+                          onClick={() => window.open(file.url, '_blank')}
+                          className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
                         >
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Eye className="h-3 w-3 mr-1" />
-                            Preview
-                          </Button>
-                        </a>
+                          <Eye className="h-3 w-3 mr-1" />
+                          Preview
+                        </button>
                         
                           href={file.url}
                           download={file.name}
-                          className="flex-1"
+                          className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
                         >
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Download className="h-3 w-3 mr-1" />
-                            Download
-                          </Button>
+                          <Download className="h-3 w-3 mr-1" />
+                          Download
                         </a>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <button
                           onClick={() => handleDeleteFile(file.id)}
-                          className="text-red-600 hover:bg-red-50"
+                          className="px-3 py-2 text-sm font-medium text-red-600 bg-white border border-gray-300 rounded-lg hover:bg-red-50 transition-colors"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </button>
                       </div>
                     </CardContent>
                   </Card>
@@ -296,10 +288,10 @@ export function RestaurantMenu() {
         <>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Menu Items</h2>
-            <Button variant="primary">
+            <button className="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center">
               <Plus className="h-4 w-4 mr-2" />
               Add Menu Item
-            </Button>
+            </button>
           </div>
 
           {categories.length === 0 ? (
@@ -312,10 +304,10 @@ export function RestaurantMenu() {
                 <p className="text-gray-600 mb-4">
                   Start building your digital menu by adding items
                 </p>
-                <Button variant="primary">
+                <button className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors inline-flex items-center">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your First Item
-                </Button>
+                </button>
               </CardContent>
             </Card>
           ) : (
@@ -360,17 +352,15 @@ export function RestaurantMenu() {
                                     {item.is_available ? 'Available' : 'Unavailable'}
                                   </span>
                                   <div className="flex space-x-1">
-                                    <Button variant="ghost" size="sm">
-                                      <Edit className="h-3 w-3" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
+                                    <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                      <Edit className="h-4 w-4" />
+                                    </button>
+                                    <button
                                       onClick={() => handleDeleteItem(item.id)}
-                                      className="text-red-600 hover:bg-red-50"
+                                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                     >
-                                      <Trash2 className="h-3 w-3" />
-                                    </Button>
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
                                   </div>
                                 </div>
                               </div>
