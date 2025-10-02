@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, FileText, Image, X, Download, Eye, Plus, Edit, Trash2, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
+import { Card, CardContent } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 
 interface MenuItem {
@@ -20,6 +20,15 @@ interface MenuFile {
   url: string;
   size: string;
   uploaded_at: string;
+}
+
+interface MenuItemForm {
+  name: string;
+  description: string;
+  price: string;
+  category: string;
+  image_url: string;
+  is_available: boolean;
 }
 
 export function RestaurantMenu() {
@@ -56,7 +65,17 @@ export function RestaurantMenu() {
 
   const [uploadMode, setUploadMode] = useState<'items' | 'files'>('items');
   const [isDragging, setIsDragging] = useState(false);
-  const [showAddItemModal, setShowAddItemModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  
+  const [formData, setFormData] = useState<MenuItemForm>({
+    name: '',
+    description: '',
+    price: '',
+    category: 'Main Course',
+    image_url: '',
+    is_available: true
+  });
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -125,18 +144,65 @@ export function RestaurantMenu() {
     }
   };
 
-  const handleAddMenuItem = () => {
-    // Temporary: Add a sample item
-    const newItem: MenuItem = {
-      id: Date.now().toString(),
-      name: 'New Dish',
-      description: 'Click edit to add description',
-      price: 0.00,
+  const openAddModal = () => {
+    setEditingItem(null);
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
       category: 'Main Course',
+      image_url: '',
       is_available: true
+    });
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (item: MenuItem) => {
+    setEditingItem(item);
+    setFormData({
+      name: item.name,
+      description: item.description,
+      price: item.price.toString(),
+      category: item.category,
+      image_url: item.image_url || '',
+      is_available: item.is_available
+    });
+    setShowAddModal(true);
+  };
+
+  const handleSubmitMenuItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.price) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const menuItem: MenuItem = {
+      id: editingItem ? editingItem.id : Date.now().toString(),
+      name: formData.name,
+      description: formData.description,
+      price: parseFloat(formData.price),
+      category: formData.category,
+      image_url: formData.image_url || undefined,
+      is_available: formData.is_available
     };
-    setMenuItems(prev => [...prev, newItem]);
-    alert('Menu item added! (This is a demo - full form coming soon)');
+
+    if (editingItem) {
+      setMenuItems(prev => prev.map(item => item.id === editingItem.id ? menuItem : item));
+    } else {
+      setMenuItems(prev => [...prev, menuItem]);
+    }
+
+    setShowAddModal(false);
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      category: 'Main Course',
+      image_url: '',
+      is_available: true
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -303,7 +369,7 @@ export function RestaurantMenu() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Menu Items</h2>
             <button 
-              onClick={handleAddMenuItem}
+              onClick={openAddModal}
               className="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -322,7 +388,7 @@ export function RestaurantMenu() {
                   Start building your digital menu by adding items
                 </p>
                 <button 
-                  onClick={handleAddMenuItem}
+                  onClick={openAddModal}
                   className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors inline-flex items-center"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -373,7 +439,7 @@ export function RestaurantMenu() {
                                   </span>
                                   <div className="flex space-x-1">
                                     <button 
-                                      onClick={() => alert('Edit functionality coming soon!')}
+                                      onClick={() => openEditModal(item)}
                                       className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                     >
                                       <Edit className="h-4 w-4" />
@@ -397,6 +463,130 @@ export function RestaurantMenu() {
             </div>
           )}
         </>
+      )}
+
+      {/* Add/Edit Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {editingItem ? 'Edit Menu Item' : 'Add New Menu Item'}
+              </h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitMenuItem} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Dish Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="e.g. Truffle Risotto"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Describe your dish..."
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  >
+                    <option value="Appetizer">Appetizer</option>
+                    <option value="Main Course">Main Course</option>
+                    <option value="Dessert">Dessert</option>
+                    <option value="Beverage">Beverage</option>
+                    <option value="Side Dish">Side Dish</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image URL (optional)
+                </label>
+                <input
+                  type="url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="is_available"
+                  checked={formData.is_available}
+                  onChange={(e) => setFormData({...formData, is_available: e.target.checked})}
+                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                />
+                <label htmlFor="is_available" className="ml-2 text-sm font-medium text-gray-700">
+                  Available for ordering
+                </label>
+              </div>
+
+              <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                >
+                  {editingItem ? 'Update Item' : 'Add Item'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
