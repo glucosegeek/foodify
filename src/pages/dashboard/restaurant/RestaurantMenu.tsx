@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, Search, Filter, Eye, EyeOff, Star, Clock, DollarSign, TrendingUp } from 'lucide-react';
+import { Upload, FileText, Image, X, Download, Eye, Plus, Edit, Trash2, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
-import { Input } from '../../../components/ui/Input';
 
 interface MenuItem {
   id: string;
@@ -12,11 +11,15 @@ interface MenuItem {
   category: string;
   image_url?: string;
   is_available: boolean;
-  is_signature: boolean;
-  is_seasonal: boolean;
-  spice_level: number;
-  preparation_time?: number;
-  popularity_rank: number;
+}
+
+interface MenuFile {
+  id: string;
+  name: string;
+  type: 'pdf' | 'image';
+  url: string;
+  size: string;
+  uploaded_at: string;
 }
 
 export function RestaurantMenu() {
@@ -24,431 +27,363 @@ export function RestaurantMenu() {
     {
       id: '1',
       name: 'Truffle Risotto',
-      description: 'Creamy Arborio rice with black truffle, parmesan, and wild mushrooms',
-      price: 28.99,
+      description: 'Creamy risotto with wild mushrooms and truffle oil',
+      price: 24.99,
       category: 'Main Course',
       image_url: 'https://images.unsplash.com/photo-1476124369491-b79d2e6b1b4c?w=400',
-      is_available: true,
-      is_signature: true,
-      is_seasonal: false,
-      spice_level: 0,
-      preparation_time: 25,
-      popularity_rank: 95
+      is_available: true
     },
     {
       id: '2',
-      name: 'Margherita Pizza',
-      description: 'Classic pizza with San Marzano tomatoes, fresh mozzarella, and basil',
-      price: 16.99,
-      category: 'Pizza',
-      image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400',
-      is_available: true,
-      is_signature: false,
-      is_seasonal: false,
-      spice_level: 0,
-      preparation_time: 15,
-      popularity_rank: 88
-    },
-    {
-      id: '3',
-      name: 'Tiramisu',
-      description: 'Traditional Italian dessert with espresso-soaked ladyfingers and mascarpone',
-      price: 9.99,
-      category: 'Dessert',
-      is_available: true,
-      is_signature: true,
-      is_seasonal: false,
-      spice_level: 0,
-      preparation_time: 5,
-      popularity_rank: 92
+      name: 'Grilled Salmon',
+      description: 'Fresh Atlantic salmon with lemon butter sauce',
+      price: 28.50,
+      category: 'Main Course',
+      is_available: true
     }
   ]);
 
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-
-  const [formData, setFormData] = useState<Partial<MenuItem>>({
-    name: '',
-    description: '',
-    price: 0,
-    category: 'Main Course',
-    is_available: true,
-    is_signature: false,
-    is_seasonal: false,
-    spice_level: 0,
-    preparation_time: 15
-  });
-
-  const categories = ['All', 'Appetizer', 'Main Course', 'Pizza', 'Pasta', 'Dessert', 'Beverage'];
-
-  const handleSaveItem = () => {
-    if (editingItem) {
-      setMenuItems(prev => prev.map(item =>
-        item.id === editingItem.id ? { ...item, ...formData } : item
-      ));
-      setEditingItem(null);
-    } else {
-      const newItem: MenuItem = {
-        id: Date.now().toString(),
-        ...formData,
-        popularity_rank: 50
-      } as MenuItem;
-      setMenuItems(prev => [...prev, newItem]);
+  const [menuFiles, setMenuFiles] = useState<MenuFile[]>([
+    {
+      id: '1',
+      name: 'Main Menu 2025.pdf',
+      type: 'pdf',
+      url: 'https://example.com/menu.pdf',
+      size: '2.4 MB',
+      uploaded_at: '2025-01-15T10:30:00Z'
     }
-    resetForm();
+  ]);
+
+  const [uploadMode, setUploadMode] = useState<'items' | 'files'>('items');
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      const fileType = file.type.includes('pdf') ? 'pdf' : 'image';
+      const newFile: MenuFile = {
+        id: Date.now().toString() + Math.random(),
+        name: file.name,
+        type: fileType,
+        url: URL.createObjectURL(file),
+        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+        uploaded_at: new Date().toISOString()
+      };
+      setMenuFiles(prev => [...prev, newFile]);
+    });
   };
 
-  const handleEditItem = (item: MenuItem) => {
-    setEditingItem(item);
-    setFormData(item);
-    setShowAddDialog(true);
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      // Validate file type
+      const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        alert(`Invalid file type: ${file.name}. Only PDF, JPG, and PNG files are allowed.`);
+        return;
+      }
+
+      const fileType = file.type.includes('pdf') ? 'pdf' : 'image';
+      const newFile: MenuFile = {
+        id: Date.now().toString() + Math.random(),
+        name: file.name,
+        type: fileType,
+        url: URL.createObjectURL(file),
+        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+        uploaded_at: new Date().toISOString()
+      };
+      setMenuFiles(prev => [...prev, newFile]);
+    });
+  };
+
+  const handleDeleteFile = (fileId: string) => {
+    if (confirm('Are you sure you want to delete this menu file?')) {
+      setMenuFiles(prev => prev.filter(f => f.id !== fileId));
+    }
   };
 
   const handleDeleteItem = (itemId: string) => {
-    if (window.confirm('Are you sure you want to delete this menu item?')) {
-      setMenuItems(prev => prev.filter(item => item.id !== itemId));
+    if (confirm('Are you sure you want to delete this menu item?')) {
+      setMenuItems(prev => prev.filter(i => i.id !== itemId));
     }
   };
 
-  const toggleAvailability = (itemId: string) => {
-    setMenuItems(prev => prev.map(item =>
-      item.id === itemId ? { ...item, is_available: !item.is_available } : item
-    ));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: 0,
-      category: 'Main Course',
-      is_available: true,
-      is_signature: false,
-      is_seasonal: false,
-      spice_level: 0,
-      preparation_time: 15
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
-    setShowAddDialog(false);
-    setEditingItem(null);
   };
 
-  const filteredItems = menuItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
-
-  const stats = {
-    total: menuItems.length,
-    available: menuItems.filter(i => i.is_available).length,
-    signature: menuItems.filter(i => i.is_signature).length,
-    seasonal: menuItems.filter(i => i.is_seasonal).length
-  };
+  const categories = [...new Set(menuItems.map(item => item.category))];
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Menu Management</h1>
-            <p className="text-gray-600 mt-2">Add, edit, and organize your menu items</p>
-          </div>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Menu Item
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-gray-600 mb-1">Total Items</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-gray-600 mb-1">Available</p>
-              <p className="text-2xl font-bold text-green-600">{stats.available}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-gray-600 mb-1">Signature Dishes</p>
-              <p className="text-2xl font-bold text-orange-600">{stats.signature}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-gray-600 mb-1">Seasonal Items</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.seasonal}</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search menu items..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          >
-            {categories.map(cat => (
-              <option key={cat} value={cat.toLowerCase()}>{cat}</option>
-            ))}
-          </select>
-        </div>
+        <h1 className="text-3xl font-bold text-gray-900">Menu Management</h1>
+        <p className="text-gray-600 mt-2">Manage your menu items or upload menu files (PDF, JPG, PNG)</p>
       </div>
 
-      {showAddDialog && (
-        <Card className="mb-6 border-2 border-orange-200">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {editingItem ? 'Edit Menu Item' : 'Add New Menu Item'}
-              </h3>
-              <Button variant="ghost" onClick={resetForm}>✕</Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Item Name *"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Margherita Pizza"
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category *
+      {/* Toggle between Items and Files */}
+      <div className="flex space-x-2 mb-6">
+        <button
+          onClick={() => setUploadMode('items')}
+          className={`px-6 py-3 rounded-lg font-medium transition-all ${
+            uploadMode === 'items'
+              ? 'bg-orange-500 text-white shadow-lg'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <Plus className="h-4 w-4 inline mr-2" />
+          Menu Items ({menuItems.length})
+        </button>
+        <button
+          onClick={() => setUploadMode('files')}
+          className={`px-6 py-3 rounded-lg font-medium transition-all ${
+            uploadMode === 'files'
+              ? 'bg-orange-500 text-white shadow-lg'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <Upload className="h-4 w-4 inline mr-2" />
+          Menu Files ({menuFiles.length})
+        </button>
+      </div>
+
+      {/* Upload Files Section */}
+      {uploadMode === 'files' && (
+        <>
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <div
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                  isDragging
+                    ? 'border-orange-500 bg-orange-50'
+                    : 'border-gray-300 hover:border-orange-400 hover:bg-gray-50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Upload Menu Files
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Drag and drop your menu files here, or click to browse
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Supported formats: PDF, JPG, PNG (Max size: 10MB)
+                </p>
+                <input
+                  type="file"
+                  id="menu-file-upload"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <label htmlFor="menu-file-upload">
+                  <Button variant="primary" size="lg" className="cursor-pointer">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Choose Files
+                  </Button>
                 </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  {categories.filter(c => c !== 'All').map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Describe your dish..."
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <Input
-                label="Price ($) *"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                placeholder="0.00"
-              />
-              <Input
-                label="Prep Time (min)"
-                type="number"
-                value={formData.preparation_time}
-                onChange={(e) => setFormData({ ...formData, preparation_time: parseInt(e.target.value) })}
-                placeholder="15"
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Spice Level
-                </label>
-                <select
-                  value={formData.spice_level}
-                  onChange={(e) => setFormData({ ...formData, spice_level: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value={0}>None</option>
-                  <option value={1}>Mild 🌶️</option>
-                  <option value={2}>Medium 🌶️🌶️</option>
-                  <option value={3}>Hot 🌶️🌶️🌶️</option>
-                </select>
+          {/* Uploaded Files List */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900">Uploaded Menu Files</h2>
+            {menuFiles.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No menu files uploaded yet
+                  </h3>
+                  <p className="text-gray-600">
+                    Upload your menu in PDF or image format
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {menuFiles.map(file => (
+                  <Card key={file.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start space-x-4">
+                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
+                          file.type === 'pdf' ? 'bg-red-100' : 'bg-blue-100'
+                        }`}>
+                          {file.type === 'pdf' ? (
+                            <FileText className="h-6 w-6 text-red-600" />
+                          ) : (
+                            <Image className="h-6 w-6 text-blue-600" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 truncate">{file.name}</h3>
+                          <p className="text-sm text-gray-500">{file.size}</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Uploaded {formatDate(file.uploaded_at)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2 mt-4">
+                        
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1"
+                        >
+                          <Button variant="outline" size="sm" className="w-full">
+                            <Eye className="h-3 w-3 mr-1" />
+                            Preview
+                          </Button>
+                        </a>
+                        
+                          href={file.url}
+                          download={file.name}
+                          className="flex-1"
+                        >
+                          <Button variant="outline" size="sm" className="w-full">
+                            <Download className="h-3 w-3 mr-1" />
+                            Download
+                          </Button>
+                        </a>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteFile(file.id)}
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            </div>
-
-            <div className="flex items-center space-x-6">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.is_available}
-                  onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
-                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                />
-                <span className="text-sm text-gray-700">Available</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.is_signature}
-                  onChange={(e) => setFormData({ ...formData, is_signature: e.target.checked })}
-                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                />
-                <span className="text-sm text-gray-700">Signature Dish</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.is_seasonal}
-                  onChange={(e) => setFormData({ ...formData, is_seasonal: e.target.checked })}
-                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                />
-                <span className="text-sm text-gray-700">Seasonal Item</span>
-              </label>
-            </div>
-
-            <div className="flex space-x-3 pt-4">
-              <Button onClick={handleSaveItem} disabled={!formData.name || !formData.price}>
-                {editingItem ? 'Update Item' : 'Add Item'}
-              </Button>
-              <Button variant="outline" onClick={resetForm}>
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            )}
+          </div>
+        </>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
-          <Card key={item.id} className={`hover:shadow-lg transition-shadow ${!item.is_available ? 'opacity-60' : ''}`}>
-            <CardContent className="p-0">
-              {item.image_url && (
-                <div className="relative h-48">
-                  <img
-                    src={item.image_url}
-                    alt={item.name}
-                    className="w-full h-full object-cover rounded-t-xl"
-                  />
-                  <div className="absolute top-2 right-2 flex space-x-1">
-                    {item.is_signature && (
-                      <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
-                        <Star className="h-3 w-3 mr-1 fill-current" />
-                        Signature
-                      </span>
-                    )}
-                    {item.is_seasonal && (
-                      <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                        Seasonal
-                      </span>
-                    )}
+      {/* Menu Items Section */}
+      {uploadMode === 'items' && (
+        <>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Menu Items</h2>
+            <Button variant="primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Menu Item
+            </Button>
+          </div>
+
+          {categories.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Plus className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No menu items yet
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Start building your digital menu by adding items
+                </p>
+                <Button variant="primary">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Item
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-8">
+              {categories.map(category => (
+                <div key={category}>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 border-b-2 border-orange-500 pb-2">
+                    {category}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {menuItems
+                      .filter(item => item.category === category)
+                      .map(item => (
+                        <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex space-x-4">
+                              {item.image_url && (
+                                <img
+                                  src={item.image_url}
+                                  alt={item.name}
+                                  className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between mb-2">
+                                  <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                                  <span className="text-lg font-bold text-orange-600 ml-2">
+                                    ${item.price.toFixed(2)}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                  {item.description}
+                                </p>
+                                <div className="flex items-center justify-between">
+                                  <span
+                                    className={`text-xs px-2 py-1 rounded-full ${
+                                      item.is_available
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                  >
+                                    {item.is_available ? 'Available' : 'Unavailable'}
+                                  </span>
+                                  <div className="flex space-x-1">
+                                    <Button variant="ghost" size="sm">
+                                      <Edit className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleDeleteItem(item.id)}
+                                      className="text-red-600 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                   </div>
                 </div>
-              )}
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg">{item.name}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{item.category}</p>
-                  </div>
-                  <p className="text-lg font-bold text-orange-600">${item.price.toFixed(2)}</p>
-                </div>
-
-                <p className="text-sm text-gray-700 mb-3 line-clamp-2">{item.description}</p>
-
-                <div className="flex items-center space-x-4 text-xs text-gray-600 mb-3">
-                  {item.preparation_time && (
-                    <span className="flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {item.preparation_time} min
-                    </span>
-                  )}
-                  {item.spice_level > 0 && (
-                    <span>{'🌶️'.repeat(item.spice_level)}</span>
-                  )}
-                  <span className="flex items-center">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    {item.popularity_rank}% popular
-                  </span>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleAvailability(item.id)}
-                    className="flex-1"
-                  >
-                    {item.is_available ? (
-                      <>
-                        <Eye className="h-3 w-3 mr-1" />
-                        Available
-                      </>
-                    ) : (
-                      <>
-                        <EyeOff className="h-3 w-3 mr-1" />
-                        Unavailable
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditItem(item)}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteItem(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredItems.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No items found
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {searchQuery || categoryFilter !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Add your first menu item to get started'}
-            </p>
-            {!searchQuery && categoryFilter === 'all' && (
-              <Button onClick={() => setShowAddDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Menu Item
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
