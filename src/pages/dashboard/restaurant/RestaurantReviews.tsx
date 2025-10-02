@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Star, MessageCircle, ThumbsUp, Flag, Filter, Send, Eye, EyeOff } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
+import { Star, MessageCircle, ThumbsUp, Flag, Send } from 'lucide-react';
+import { Card, CardContent } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 
 interface Review {
@@ -19,7 +19,7 @@ interface Review {
     text: string;
     created_at: string;
   };
-  moderation_status: 'active' | 'flagged' | 'hidden';
+  moderation_status: 'active' | 'flagged';
 }
 
 export function RestaurantReviews() {
@@ -107,14 +107,6 @@ export function RestaurantReviews() {
 
     setReplyText('');
     setReplyingTo(null);
-  };
-
-  const handleHideReview = (reviewId: string) => {
-    setReviews(prev => prev.map(review =>
-      review.id === reviewId
-        ? { ...review, moderation_status: review.moderation_status === 'hidden' ? 'active' : 'hidden' as const }
-        : review
-    ));
   };
 
   const filteredReviews = reviews.filter(review => {
@@ -270,9 +262,7 @@ export function RestaurantReviews() {
         {filteredReviews.map((review) => (
           <Card
             key={review.id}
-            className={`${
-              review.moderation_status === 'hidden' ? 'opacity-50 border-2 border-gray-300' : ''
-            } ${review.moderation_status === 'flagged' ? 'border-2 border-red-200' : ''}`}
+            className={review.moderation_status === 'flagged' ? 'border-2 border-red-200' : ''}
           >
             <CardContent className="p-6">
               <div className="flex items-start space-x-4">
@@ -300,12 +290,6 @@ export function RestaurantReviews() {
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">
                             <Flag className="h-3 w-3 mr-1" />
                             Flagged
-                          </span>
-                        )}
-                        {review.moderation_status === 'hidden' && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
-                            <EyeOff className="h-3 w-3 mr-1" />
-                            Hidden
                           </span>
                         )}
                       </div>
@@ -387,8 +371,8 @@ export function RestaurantReviews() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center space-x-2 mt-4">
-                      {!review.has_response && (
+                    !review.has_response && (
+                      <div className="mt-4">
                         <Button
                           size="sm"
                           variant="outline"
@@ -397,25 +381,8 @@ export function RestaurantReviews() {
                           <MessageCircle className="h-3 w-3 mr-1" />
                           Reply
                         </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleHideReview(review.id)}
-                      >
-                        {review.moderation_status === 'hidden' ? (
-                          <>
-                            <Eye className="h-3 w-3 mr-1" />
-                            Show
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff className="h-3 w-3 mr-1" />
-                            Hide
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                      </div>
+                    )
                   )}
                 </div>
               </div>
