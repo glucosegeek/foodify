@@ -116,38 +116,22 @@ if (element) {
             >
               Top Restaurants
             </a>
-            {user && (
-              <Link
-                to={getDashboardLink()}
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-              >
-                Dashboard
-              </Link>
-            )}
           </nav>
 
           <div className="flex items-center space-x-4">
             {user ? (
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
-                  <RoleIcon className="h-4 w-4 text-gray-500" />
-                  <div className="hidden sm:block">
-                    <span className="text-xs text-gray-500 uppercase font-medium">
-                      {getRoleLabel()}
-                    </span>
-                    <div className="text-sm text-gray-700 font-medium">
-                      {user.email}
-                    </div>
+              <div className="flex items-center space-x-2">
+                <Link 
+                  to="/dashboard"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600 font-semibold">
+                    {user.email?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                </div>
-                
-                <Link to={getDashboardLink()}>
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-1">
-                    <Settings className="h-4 w-4" />
-                    <span className="hidden sm:inline">Dashboard</span>
-                  </Button>
+                  <span className="text-sm text-gray-700 font-medium hidden sm:inline">
+                    {user.email}
+                  </span>
                 </Link>
-                
                 <Button
                   variant="ghost"
                   size="sm"
