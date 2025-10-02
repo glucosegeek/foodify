@@ -56,6 +56,7 @@ export function RestaurantMenu() {
 
   const [uploadMode, setUploadMode] = useState<'items' | 'files'>('items');
   const [isDragging, setIsDragging] = useState(false);
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -122,6 +123,20 @@ export function RestaurantMenu() {
     if (confirm('Are you sure you want to delete this menu item?')) {
       setMenuItems(prev => prev.filter(i => i.id !== itemId));
     }
+  };
+
+  const handleAddMenuItem = () => {
+    // Temporary: Add a sample item
+    const newItem: MenuItem = {
+      id: Date.now().toString(),
+      name: 'New Dish',
+      description: 'Click edit to add description',
+      price: 0.00,
+      category: 'Main Course',
+      is_available: true
+    };
+    setMenuItems(prev => [...prev, newItem]);
+    alert('Menu item added! (This is a demo - full form coming soon)');
   };
 
   const formatDate = (dateString: string) => {
@@ -287,7 +302,10 @@ export function RestaurantMenu() {
         <>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Menu Items</h2>
-            <button className="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center">
+            <button 
+              onClick={handleAddMenuItem}
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Menu Item
             </button>
@@ -303,7 +321,10 @@ export function RestaurantMenu() {
                 <p className="text-gray-600 mb-4">
                   Start building your digital menu by adding items
                 </p>
-                <button className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors inline-flex items-center">
+                <button 
+                  onClick={handleAddMenuItem}
+                  className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors inline-flex items-center"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your First Item
                 </button>
@@ -351,7 +372,10 @@ export function RestaurantMenu() {
                                     {item.is_available ? 'Available' : 'Unavailable'}
                                   </span>
                                   <div className="flex space-x-1">
-                                    <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <button 
+                                      onClick={() => alert('Edit functionality coming soon!')}
+                                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                    >
                                       <Edit className="h-4 w-4" />
                                     </button>
                                     <button
