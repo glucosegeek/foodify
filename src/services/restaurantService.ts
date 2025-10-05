@@ -633,6 +633,29 @@ export async function getRestaurantStats(restaurantId: string): Promise<{
   }
 }
 
+// Fetch restaurant by user ID
+export async function getRestaurantByUserId(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('restaurants')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned - user doesn't have a restaurant yet
+        return null;
+      }
+      throw error;
+    }
+    return data as Restaurant;
+  } catch (error) {
+    console.error('Error fetching restaurant by user ID:', error);
+    return null;
+  }
+}
+
 // Get unique filter options
 export async function getFilterOptions() {
   try {
