@@ -1,64 +1,19 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User, Session, AuthError } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
+import { Database } from '../types/database.types';
 
-// Types
-export type UserRole = 'CUSTOMER' | 'RESTAURANT' | 'ADMIN';
-
-export interface CustomerProfile {
-  username: string;
-  avatar_url?: string;
-  bio?: string;
-  favorite_cuisines: string[];
-  followers_count: number;
-  following_count: number;
-  reviews_count: number;
-  photos_count: number;
-  location?: string;
-  preferences: {
-    dietary_restrictions: string[];
-    price_range_preference: string;
-    notifications_enabled: boolean;
-    profile_public: boolean;
-  };
-}
-
-export interface RestaurantProfile {
-  name: string;
-  logo_url?: string;
-  description: string;
-  cuisine_types: string[];
-  address: string;
-  phone: string;
-  website?: string;
-  hours: {
-    [key: string]: { open: string; close: string; closed?: boolean };
-  };
-  tags: string[]; // ['vege-friendly', 'verified', 'delivery']
-  verification_status: 'pending' | 'verified' | 'rejected';
-  followers_count: number;
-  reviews_count: number;
-  average_rating: number;
-  team_members: string[]; // IDs of team members
-}
-
-type User = {
-  id: string;
-  email?: string;
-  role: UserRole;
-  profile?: CustomerProfile | RestaurantProfile;
-} | null;
-
-type Session = {
-  user: User;
-} | null;
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface AuthContextType {
   user: User | null;
+  profile: Profile | null;
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, role: UserRole) => Promise<void>;
+  signUp: (email: string, password: string, fullName?: string, role?: 'customer' | 'restaurant') => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (profile: Partial<CustomerProfile | RestaurantProfile>) => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,116 +26,202 @@ export function useAuth() {
   return context;
 }
 
-// Mock profiles
-const mockCustomerProfile: CustomerProfile = {
-  username: "foodlover123",
-  avatar_url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
-  bio: "Passionate foodie exploring local cuisine. Love trying new flavors and discovering hidden gems!",
-  favorite_cuisines: ["Italian", "Japanese", "Mexican", "Thai"],
-  followers_count: 45,
-  following_count: 23,
-  reviews_count: 12,
-  photos_count: 28,
-  location: "Warsaw, Poland",
-  preferences: {
-    dietary_restrictions: ["Vegetarian"],
-    price_range_preference: "$$",
-    notifications_enabled: true,
-    profile_public: true
-  }
-};
-
-const mockRestaurantProfile: RestaurantProfile = {
-  name: "Bella Vista Italian",
-  logo_url: "https://images.pexels.com/photos/1566837/pexels-photo-1566837.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop",
-  description: "Authentic Italian cuisine with fresh ingredients sourced directly from Italy. Family-owned restaurant serving traditional recipes passed down through generations.",
-  cuisine_types: ["Italian", "Mediterranean"],
-  address: "123 Main Street, Warsaw",
-  phone: "+48 22 123 4567",
-  website: "https://bellavista-italian.com",
-  hours: {
-    monday: { open: "12:00", close: "22:00" },
-    tuesday: { open: "12:00", close: "22:00" },
-    wednesday: { open: "12:00", close: "22:00" },
-    thursday: { open: "12:00", close: "22:00" },
-    friday: { open: "12:00", close: "23:00" },
-    saturday: { open: "12:00", close: "23:00" },
-    sunday: { open: "14:00", close: "21:00" }
-  },
-  tags: ["vege-friendly", "verified", "delivery", "romantic"],
-  verification_status: "verified",
-  followers_count: 234,
-  reviews_count: 89,
-  average_rating: 4.8,
-  team_members: ["manager1", "chef1"]
-};
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch user profile from database
+  const fetchProfile = async (userId: string): Promise<Profile | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+  };
+
+  // Refresh profile data
+  const refreshProfile = async () => {
+    if (user) {
+      const profileData = await fetchProfile(user.id);
+      setProfile(profileData);
+    }
+  };
+
+  // Initialize auth state
   useEffect(() => {
-    // TEMPORARY: Mock auth state for development
-    setLoading(false);
+    // Get initial session
+    const initAuth = async () => {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          setLoading(false);
+          return;
+        }
+
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+
+        // Fetch profile if user exists
+        if (initialSession?.user) {
+          const profileData = await fetchProfile(initialSession.user.id);
+          setProfile(profileData);
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, currentSession) => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+
+        // Fetch profile when user signs in
+        if (currentSession?.user) {
+          const profileData = await fetchProfile(currentSession.user.id);
+          setProfile(profileData);
+        } else {
+          setProfile(null);
+        }
+
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
+  // Sign in with email and password
   const signIn = async (email: string, password: string) => {
-    // Mock login - determine role based on email
-    const role: UserRole = email.includes('restaurant') ? 'RESTAURANT' : 
-                          email.includes('admin') ? 'ADMIN' : 'CUSTOMER';
-    
-    const profile = role === 'RESTAURANT' ? mockRestaurantProfile : mockCustomerProfile;
-    
-    const mockUser = { 
-      id: '1', 
-      email, 
-      role,
-      profile
-    };
-    const mockSession = { user: mockUser };
-    setUser(mockUser);
-    setSession(mockSession);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      // Profile will be fetched by onAuthStateChange listener
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('An unexpected error occurred during sign in');
+    }
   };
 
-  const signUp = async (email: string, password: string, role: UserRole) => {
-    const profile = role === 'RESTAURANT' ? mockRestaurantProfile : mockCustomerProfile;
-    
-    const mockUser = { 
-      id: '1', 
-      email, 
-      role,
-      profile
-    };
-    const mockSession = { user: mockUser };
-    setUser(mockUser);
-    setSession(mockSession);
+  // Sign up with email and password
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName?: string,
+    role: 'customer' | 'restaurant' = 'customer'
+  ) => {
+    try {
+      // Create auth user with metadata
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName || email.split('@')[0],
+            role: role,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (!data.user) {
+        throw new Error('User creation failed');
+      }
+
+      // Profile is automatically created by database trigger (handle_new_user)
+      // But we need to update the role if it's a restaurant
+      if (role === 'restaurant') {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ role: 'restaurant' })
+          .eq('id', data.user.id);
+
+        if (profileError) {
+          console.error('Error updating profile role:', profileError);
+        }
+      }
+
+      // For customers, create customer_profile
+      if (role === 'customer') {
+        const { error: customerProfileError } = await supabase
+          .from('customer_profiles')
+          .insert({
+            user_id: data.user.id,
+            preferred_cuisines: [],
+            dietary_restrictions: [],
+            favorite_restaurants: [],
+          });
+
+        if (customerProfileError) {
+          console.error('Error creating customer profile:', customerProfileError);
+        }
+      }
+
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('An unexpected error occurred during sign up');
+    }
   };
 
+  // Sign out
   const signOut = async () => {
-    setUser(null);
-    setSession(null);
-  };
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
 
-  const updateProfile = async (profileUpdate: Partial<CustomerProfile | RestaurantProfile>) => {
-    if (user && user.profile) {
-      const updatedUser = {
-        ...user,
-        profile: { ...user.profile, ...profileUpdate }
-      };
-      setUser(updatedUser);
-      setSession({ user: updatedUser });
+      // Clear local state
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('An unexpected error occurred during sign out');
     }
   };
 
   const value = {
     user,
+    profile,
     session,
     loading,
     signIn,
     signUp,
     signOut,
-    updateProfile,
+    refreshProfile,
   };
 
   return (
