@@ -519,7 +519,30 @@ export async function getRestaurantBySlug(slug: string) {
   }
 }
 
-getRestaurantMenu
+// Fetch menu items for a restaurant
+export async function getRestaurantMenu(restaurantId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('menu_items')
+      .select(`
+        *,
+        menu_categories (
+          name,
+          description,
+          display_order
+        )
+      `)
+      .eq('restaurant_id', restaurantId)
+      .eq('is_available', true)
+      .order('display_order', { ascending: true });
+
+    if (error) throw error;
+    return { data: data as MenuItem[], error: null };
+  } catch (error) {
+    console.error('Error fetching menu:', error);
+    return { data: null, error };
+  }
+}
 
 /**
  * Get restaurant stats
