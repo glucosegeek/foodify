@@ -519,6 +519,8 @@ export async function getRestaurantBySlug(slug: string) {
   }
 }
 
+getRestaurantMenu
+
 /**
  * Get restaurant stats
  */
