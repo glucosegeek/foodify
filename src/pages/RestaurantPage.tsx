@@ -1,306 +1,228 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { RestaurantHeader } from '../components/restaurant/RestaurantHeader';
-import { RestaurantMenu } from '../components/restaurant/RestaurantMenu';
-import { RestaurantReviews } from '../components/restaurant/RestaurantReviews';
-import type { Restaurant, MenuCategory, Review } from '../types/restaurant';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { Database } from '../types/database';
+import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { Star, MapPin, DollarSign, Loader2, Search } from 'lucide-react';
+
+type Restaurant = Database['public']['Tables']['restaurants']['Row'];
 
 export function RestaurantPage() {
-  const { id } = useParams<{ id: string }>();
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Mock data - replace with actual API calls
-  const mockRestaurants: Restaurant[] = [
-    {
-      id: '1',
-      name: 'Bella Vista Italian',
-      description: 'Authentic Italian cuisine with fresh ingredients sourced directly from Italy. Family-owned restaurant serving traditional recipes passed down through generations. Experience the true taste of Italy in our warm, welcoming atmosphere.',
-      cuisine_type: 'Italian',
-      location: 'Downtown',
-      logo_url: 'https://images.pexels.com/photos/1566837/pexels-photo-1566837.jpeg?auto=compress&cs=tinysrgb&w=400',
-      rating: 4.8,
-      price_range: '$$$',
-      standout_dish: 'Truffle Risotto with Wild Mushrooms',
-      phone: '(555) 123-4567',
-      website: 'https://bellavista-italian.com',
-      dietary_options: ['Vegetarian', 'Gluten-free'],
-      dining_style: 'Fine dining',
-      review_count: 127,
-      hours: {
-        'Poniedziałek': '17:00 - 22:00',
-        'Wtorek': '17:00 - 22:00',
-        'Środa': '17:00 - 22:00',
-        'Czwartek': '17:00 - 22:00',
-        'Piątek': '17:00 - 23:00',
-        'Sobota': '12:00 - 23:00',
-        'Niedziela': '12:00 - 21:00'
-      }
-    },
-    {
-      id: '2',
-      name: 'Sakura Sushi Bar',
-      description: 'Fresh sushi and Japanese delicacies prepared by master chef Takeshi. Experience authentic Edo-style sushi in an intimate setting.',
-      cuisine_type: 'Japanese',
-      location: 'Midtown',
-      logo_url: 'https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg?auto=compress&cs=tinysrgb&w=400',
-      rating: 4.9,
-      price_range: '$$$$',
-      standout_dish: 'Omakase Tasting Menu',
-      phone: '(555) 234-5678',
-      website: 'https://sakura-sushi.com',
-      dietary_options: ['Gluten-free'],
-      dining_style: 'Fine dining',
-      review_count: 89
-    }
-  ];
-
-  const mockMenuCategories: { [key: string]: MenuCategory[] } = {
-    '1': [
-      {
-        id: 'appetizers',
-        name: 'Przystawki',
-        items: [
-          {
-            id: 'bruschetta',
-            name: 'Bruschetta Classica',
-            description: 'Grillowane pieczywo z pomidorami, bazylią i czosnkiem',
-            price: 24,
-            category: 'appetizers',
-            is_vegetarian: true,
-            image_url: 'https://images.pexels.com/photos/1516415/pexels-photo-1516415.jpeg?auto=compress&cs=tinysrgb&w=200'
-          },
-          {
-            id: 'antipasto',
-            name: 'Antipasto della Casa',
-            description: 'Wybór włoskich wędlin, serów i marynowanych warzyw',
-            price: 45,
-            category: 'appetizers'
-          }
-        ]
-      },
-      {
-        id: 'pasta',
-        name: 'Pasta',
-        items: [
-          {
-            id: 'carbonara',
-            name: 'Spaghetti Carbonara',
-            description: 'Klasyczna carbonara z guanciale, pecorino romano i żółtkami',
-            price: 38,
-            category: 'pasta'
-          },
-          {
-            id: 'truffle-risotto',
-            name: 'Risotto ai Tartufi',
-            description: 'Kremowe risotto z dzikimi grzybami i białymi truflami',
-            price: 52,
-            category: 'pasta',
-            is_vegetarian: true
-          }
-        ]
-      },
-      {
-        id: 'main',
-        name: 'Dania główne',
-        items: [
-          {
-            id: 'osso-buco',
-            name: 'Osso Buco alla Milanese',
-            description: 'Duszona golonka cielęca z gremolata i risotto szafranowym',
-            price: 78,
-            category: 'main'
-          }
-        ]
-      }
-    ],
-    '2': [
-      {
-        id: 'sushi',
-        name: 'Sushi',
-        items: [
-          {
-            id: 'omakase',
-            name: 'Omakase',
-            description: 'Menu degustacyjne przygotowane przez szefa kuchni (12 kawałków)',
-            price: 180,
-            category: 'sushi'
-          },
-          {
-            id: 'salmon-roll',
-            name: 'Salmon Avocado Roll',
-            description: 'Łosoś, awokado, ogórek w nori (8 kawałków)',
-            price: 32,
-            category: 'sushi'
-          }
-        ]
-      }
-    ]
-  };
-
-  const mockReviews: { [key: string]: Review[] } = {
-    '1': [
-      {
-        id: 'review1',
-        user_name: 'Anna Kowalska',
-        rating: 5,
-        comment: 'Fantastyczne miejsce! Risotto z truflami było przepyszne, a obsługa bardzo miła. Zdecydowanie wrócę!',
-        date: '2024-01-15T19:30:00Z',
-        helpful_count: 12
-      },
-      {
-        id: 'review2',
-        user_name: 'Marcin Nowak',
-        rating: 4,
-        comment: 'Bardzo dobra kuchnia, autentyczne włoskie smaki. Jedyny minus to trochę długie oczekiwanie na dania, ale warto było czekać.',
-        date: '2024-01-10T20:15:00Z',
-        helpful_count: 8
-      },
-      {
-        id: 'review3',
-        user_name: 'Katarzyna Wiśniewska',
-        rating: 5,
-        comment: 'Najlepsza włoska restauracja w mieście! Atmosfera jak w prawdziwej trattori we Włoszech. Polecam carbonarę!',
-        date: '2024-01-08T18:45:00Z',
-        helpful_count: 15
-      }
-    ],
-    '2': [
-      {
-        id: 'review4',
-        user_name: 'Tomasz Jankowski',
-        rating: 5,
-        comment: 'Omakase było niesamowite! Szef Takeshi to prawdziwy artysta. Każdy kawałek sushi to dzieło sztuki.',
-        date: '2024-01-12T19:00:00Z',
-        helpful_count: 9
-      },
-      {
-        id: 'review5',
-        user_name: 'Magdalena Zielińska',
-        rating: 4,
-        comment: 'Świeże ryby, doskonała prezentacja. Ceny wysokie, ale jakość tego warta.',
-        date: '2024-01-05T20:30:00Z',
-        helpful_count: 6
-      }
-    ]
-  };
+  const [searchTerm, setSearchTerm] = useState('');
+  const [cuisineFilter, setCuisineFilter] = useState<string>('');
 
   useEffect(() => {
-    const fetchRestaurantData = async () => {
-      if (!id) {
-        setError('Nie znaleziono restauracji');
-        setLoading(false);
-        return;
-      }
+    fetchRestaurants();
+  }, []);
 
-      try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+  const fetchRestaurants = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .order('rating', { ascending: false });
 
-        const foundRestaurant = mockRestaurants.find(r => r.id === id);
-        if (!foundRestaurant) {
-          setError('Restauracja nie została znaleziona');
-          setLoading(false);
-          return;
-        }
+      if (error) throw error;
 
-        setRestaurant(foundRestaurant);
-        setMenuCategories(mockMenuCategories[id] || []);
-        setReviews(mockReviews[id] || []);
-        setLoading(false);
-      } catch (err) {
-        setError('Błąd podczas ładowania danych restauracji');
-        setLoading(false);
-      }
-    };
-
-    fetchRestaurantData();
-  }, [id]);
-
-  const handleAddReview = (newReview: Omit<Review, 'id' | 'date'>) => {
-    const review: Review = {
-      ...newReview,
-      id: `review_${Date.now()}`,
-      date: new Date().toISOString()
-    };
-    setReviews(prev => [review, ...prev]);
-    
-    // Update restaurant rating (mock calculation)
-    if (restaurant) {
-      const allRatings = [...reviews, review].map(r => r.rating);
-      const newRating = allRatings.reduce((sum, rating) => sum + rating, 0) / allRatings.length;
-      setRestaurant(prev => prev ? {
-        ...prev,
-        rating: Math.round(newRating * 10) / 10,
-        review_count: (prev.review_count || 0) + 1
-      } : null);
+      setRestaurants(data || []);
+    } catch (error) {
+      console.error('Error fetching restaurants:', error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    const matchesSearch =
+      searchTerm === '' ||
+      restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      restaurant.cuisine_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (restaurant.location &&
+        restaurant.location.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesCuisine =
+      cuisineFilter === '' || restaurant.cuisine_type === cuisineFilter;
+
+    return matchesSearch && matchesCuisine;
+  });
+
+  const cuisineTypes = Array.from(
+    new Set(restaurants.map((r) => r.cuisine_type))
+  );
+
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`h-4 w-4 ${
+              i < Math.floor(rating)
+                ? 'text-yellow-400 fill-current'
+                : i < rating
+                ? 'text-yellow-400 fill-current opacity-50'
+                : 'text-gray-300'
+            }`}
+          />
+        ))}
+        <span className="ml-1 text-sm font-medium text-gray-600">{rating}</span>
+      </div>
+    );
+  };
+
+  const renderPriceRange = (priceRange: string | null) => {
+    if (!priceRange) return null;
+    return (
+      <div className="flex items-center text-green-600">
+        {[...Array(4)].map((_, i) => (
+          <DollarSign
+            key={i}
+            className={`h-4 w-4 ${
+              i < priceRange.length ? 'opacity-100' : 'opacity-30'
+            }`}
+          />
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded w-32 mb-6"></div>
-            <div className="h-64 bg-gray-300 rounded-xl mb-8"></div>
-            <div className="space-y-4">
-              <div className="h-6 bg-gray-300 rounded w-3/4"></div>
-              <div className="h-6 bg-gray-300 rounded w-1/2"></div>
-              <div className="h-6 bg-gray-300 rounded w-2/3"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !restaurant) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {error || 'Restauracja nie została znaleziona'}
-          </h1>
-          <Link to="/">
-            <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Powrót do strony głównej
-            </Button>
-          </Link>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <Link to="/" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Powrót do listy restauracji
-        </Link>
-
-        {/* Restaurant Header */}
-        <RestaurantHeader restaurant={restaurant} />
-
-        {/* Menu Section */}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <RestaurantMenu categories={menuCategories} />
+          <h1 className="text-3xl font-bold text-gray-900">All Restaurants</h1>
+          <p className="text-gray-600 mt-2">
+            Discover amazing restaurants in your area
+          </p>
         </div>
 
-        {/* Reviews Section */}
-        <RestaurantReviews 
-          reviews={reviews} 
-          restaurantId={restaurant.id}
-          onAddReview={handleAddReview}
-        />
+        {/* Search and Filters */}
+        <div className="mb-8 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              type="text"
+              placeholder="Search restaurants, cuisines, or locations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setCuisineFilter('')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                cuisineFilter === ''
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              All Cuisines
+            </button>
+            {cuisineTypes.map((cuisine) => (
+              <button
+                key={cuisine}
+                onClick={() => setCuisineFilter(cuisine)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  cuisineFilter === cuisine
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {cuisine}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Restaurant Grid */}
+        {filteredRestaurants.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">
+              No restaurants found matching your criteria.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredRestaurants.map((restaurant) => (
+              <Link
+                key={restaurant.id}
+                to={`/restaurant/${restaurant.slug}`}
+                className="block"
+              >
+                <Card hover className="h-full">
+                  <div className="relative">
+                    <img
+                      src={
+                        restaurant.cover_photo_url ||
+                        restaurant.logo_url ||
+                        'https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg?auto=compress&cs=tinysrgb&w=600'
+                      }
+                      alt={restaurant.name}
+                      className="w-full h-48 object-cover rounded-t-xl"
+                    />
+                    <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
+                      {renderStars(restaurant.rating)}
+                    </div>
+                  </div>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-orange-500 transition-colors">
+                        {restaurant.name}
+                      </h3>
+                      <div className="flex flex-col items-end space-y-1">
+                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                          {restaurant.cuisine_type}
+                        </span>
+                        {renderPriceRange(restaurant.price_range)}
+                      </div>
+                    </div>
+
+                    {restaurant.description && (
+                      <p className="text-gray-600 mb-3 text-sm line-clamp-2">
+                        {restaurant.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center text-gray-500 text-sm">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{restaurant.location}</span>
+                    </div>
+
+                    {restaurant.dietary_options &&
+                      restaurant.dietary_options.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="flex flex-wrap gap-1">
+                            {restaurant.dietary_options.slice(0, 3).map((option) => (
+                              <span
+                                key={option}
+                                className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
+                              >
+                                {option.replace('_', ' ')}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
