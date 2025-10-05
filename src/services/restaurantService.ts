@@ -571,7 +571,7 @@ export async function getRestaurantStats(restaurantId: string): Promise<{
 }
 
 // Get unique filter options
-export async function getFilterOptions() {  // <-- BEZ WCIĘCIA!
+export async function getFilterOptions() {
   try {
     const { data, error } = await supabase
       .from('restaurants')
