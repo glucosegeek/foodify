@@ -538,7 +538,7 @@ export function RestaurantDetailPage() {
                 {restaurant.website && (
                   <div className="flex items-center space-x-3">
                     <Globe className="h-5 w-5 text-orange-500 flex-shrink-0" />
-                    
+                    <a
                       href={restaurant.website}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -566,7 +566,7 @@ export function RestaurantDetailPage() {
                     <p className="text-sm text-gray-600 text-center">
                       Coordinates: {restaurant.latitude.toFixed(6)}, {restaurant.longitude.toFixed(6)}
                     </p>
-                    
+                    <a
                       href={`https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -574,10 +574,9 @@ export function RestaurantDetailPage() {
                     >
                       Open in Google Maps →
                     </a>
-                    {/* You can integrate Google Maps or Mapbox here */}
                   </div>
-                </CardContent>
-              </Card>
+                </CardContent>        
+      </Card>
             )}
 
             {/* Stats Card */}
