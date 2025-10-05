@@ -4,7 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
-import { CustomerSettingsPage } from './pages/customer/CustomerSettingsPage';
+import { CustomerSettingsPage } from './pages/dashboard/customer/CustomerSettingsPage.tsx';
 import { DashboardLayout } from './components/dashboard/DashboardLayout';
 import { DashboardOverview } from './pages/dashboard/DashboardOverview';
 import { ProtectedRoute } from './components/ProtectedRoute';
