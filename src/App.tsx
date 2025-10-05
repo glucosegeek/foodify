@@ -4,9 +4,10 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
-import { CustomerSettingsPage } from './pages/dashboard/customer/CustomerSettingsPage.tsx';
+import { CustomerSettingsPage } from './pages/customer/CustomerSettingsPage';
 import { DashboardLayout } from './components/dashboard/DashboardLayout';
 import { DashboardOverview } from './pages/dashboard/DashboardOverview';
+import { RestaurantProfilePage } from './pages/dashboard/RestaurantProfilePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -39,7 +40,7 @@ function App() {
               }
             >
               <Route index element={<DashboardOverview />} />
-              <Route path="profile" element={<div className="p-8"><h1 className="text-2xl font-bold">Restaurant Profile - Coming Soon</h1></div>} />
+              <Route path="profile" element={<RestaurantProfilePage />} />
               <Route path="menu" element={<div className="p-8"><h1 className="text-2xl font-bold">Menu Management - Coming Soon</h1></div>} />
               <Route path="menu/add" element={<div className="p-8"><h1 className="text-2xl font-bold">Add Menu Item - Coming Soon</h1></div>} />
               <Route path="analytics" element={<div className="p-8"><h1 className="text-2xl font-bold">Analytics - Coming Soon</h1></div>} />
