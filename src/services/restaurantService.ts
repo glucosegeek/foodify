@@ -525,48 +525,64 @@ export async function getRestaurantFollowers(restaurantId: string): Promise<Prof
 /**
  * Get restaurant stats
  */
-export async function getRestaurantStats(restaurantId: string): Promise<{
-  followerCount: number;
-  reviewCount: number;
-  menuItemCount: number;
-  averageRating: number;
-}> {
+// Fetch all restaurants with optional filters
+export async function getRestaurants(filters?: {
+  cuisine?: string;
+  priceRange?: string;
+  rating?: number;
+  location?: string;
+  dietary?: string;
+  diningStyle?: string;
+  searchTerm?: string;
+  featured?: boolean;
+}) {
   try {
-    const [followersResult, reviewsResult, menuItemsResult, restaurant] = await Promise.all([
-      supabase
-        .from('restaurant_follows')
-        .select('user_id', { count: 'exact', head: true })
-        .eq('restaurant_id', restaurantId),
-      supabase
-        .from('reviews')
-        .select('rating')
-        .eq('restaurant_id', restaurantId),
-      supabase
-        .from('menu_items')
-        .select('id', { count: 'exact', head: true })
-        .eq('restaurant_id', restaurantId),
-      getRestaurant(restaurantId),
-    ]);
+    let query = supabase
+      .from('restaurants')
+      .select('*')
+      .order('rating', { ascending: false });
 
-    const ratings = reviewsResult.data?.map(r => r.rating) || [];
-    const averageRating = ratings.length > 0
-      ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
-      : 0;
+    if (filters?.featured !== undefined) {
+      query = query.eq('is_featured', filters.featured);
+    }
 
-    return {
-      followerCount: followersResult.count || 0,
-      reviewCount: reviewsResult.data?.length || 0,
-      menuItemCount: menuItemsResult.count || 0,
-      averageRating: Number(averageRating.toFixed(1)),
-    };
+    if (filters?.cuisine) {
+      query = query.eq('cuisine_type', filters.cuisine);
+    }
+
+    if (filters?.priceRange) {
+      query = query.eq('price_range', filters.priceRange);
+    }
+
+    if (filters?.rating) {
+      query = query.gte('rating', filters.rating);
+    }
+
+    if (filters?.location) {
+      query = query.eq('location', filters.location);
+    }
+
+    if (filters?.diningStyle) {
+      query = query.eq('dining_style', filters.diningStyle);
+    }
+
+    if (filters?.dietary) {
+      query = query.contains('dietary_options', [filters.dietary]);
+    }
+
+    if (filters?.searchTerm) {
+      query = query.or(
+        `name.ilike.%${filters.searchTerm}%,cuisine_type.ilike.%${filters.searchTerm}%,description.ilike.%${filters.searchTerm}%,location.ilike.%${filters.searchTerm}%`
+      );
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return { data: data as Restaurant[], error: null };
   } catch (error) {
-    console.error('Error fetching restaurant stats:', error);
-    return {
-      followerCount: 0,
-      reviewCount: 0,
-      menuItemCount: 0,
-      averageRating: 0,
-    };
+    console.error('Error fetching restaurants:', error);
+    return { data: null, error };
   }
 }
 
