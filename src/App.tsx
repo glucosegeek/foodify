@@ -4,11 +4,36 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
+import { NotFound } from './pages/NotFound';
+
+// Customer Components
+import { CustomerDashboardLayout } from './components/dashboard/CustomerDashboardLayout';
 import { CustomerSettingsPage } from './pages/dashboard/customer/CustomerSettingsPage';
-import { DashboardLayout } from './components/dashboard/DashboardLayout';
+import { CustomerOverview } from './pages/dashboard/customer/CustomerOverview';
+import { CustomerProfile } from './pages/dashboard/customer/CustomerProfile';
+import { CustomerActivities } from './pages/dashboard/customer/CustomerActivities';
+import { CustomerFollowing } from './pages/dashboard/customer/CustomerFollowing';
+import { CustomerFavorites } from './pages/dashboard/customer/CustomerFavorites';
+import { CustomerSettings } from './pages/dashboard/customer/CustomerSettings';
+
+// Restaurant Components
+import { RestaurantDashboardLayout } from './components/dashboard/RestaurantDashboardLayout';
 import { DashboardOverview } from './pages/dashboard/DashboardOverview';
 import { RestaurantProfilePage } from './pages/dashboard/RestaurantProfilePage';
+import { RestaurantMenu } from './pages/dashboard/restaurant/RestaurantMenu';
+import { RestaurantProfile } from './pages/dashboard/restaurant/RestaurantProfile';
+import { RestaurantReviews } from './pages/dashboard/restaurant/RestaurantReviews';
+import { RestaurantFollowers } from './pages/dashboard/restaurant/RestaurantFollowers';
+import { RestaurantSettings } from './pages/dashboard/restaurant/RestaurantSettings';
+import { RestaurantAnalytics } from './pages/dashboard/restaurant/RestaurantAnalytics';
+
+// Public Restaurant Pages
+import { RestaurantPage } from './pages/RestaurantPage';
+import { RestaurantDetailPage } from './pages/RestaurantDetailPage';
+
+// Protected Routes
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { RoleBasedRoute } from './components/RoleBasedRoute';
 
 function App() {
   return (
@@ -17,35 +42,53 @@ function App() {
         <div className="min-h-screen bg-gray-50">
           <Header />
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
-            
-            {/* Customer Routes */}
+            <Route path="/restaurants" element={<RestaurantPage />} />
+            <Route path="/restaurant/:slug" element={<RestaurantDetailPage />} />
+
+            {/* Customer Dashboard Routes */}
             <Route
-              path="/profile/settings"
+              path="/customer/*"
               element={
                 <ProtectedRoute>
-                  <CustomerSettingsPage />
+                  <RoleBasedRoute allowedRole="customer">
+                    <CustomerDashboardLayout />
+                  </RoleBasedRoute>
                 </ProtectedRoute>
               }
-            />
-            
+            >
+              <Route index element={<CustomerOverview />} />
+              <Route path="profile" element={<CustomerProfile />} />
+              <Route path="activities" element={<CustomerActivities />} />
+              <Route path="following" element={<CustomerFollowing />} />
+              <Route path="favorites" element={<CustomerFavorites />} />
+              <Route path="settings" element={<CustomerSettings />} />
+            </Route>
+
             {/* Restaurant Dashboard Routes */}
             <Route
-              path="/dashboard"
+              path="/dashboard/*"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout />
+                  <RoleBasedRoute allowedRole="restaurant">
+                    <RestaurantDashboardLayout />
+                  </RoleBasedRoute>
                 </ProtectedRoute>
               }
             >
               <Route index element={<DashboardOverview />} />
               <Route path="profile" element={<RestaurantProfilePage />} />
-              <Route path="menu" element={<div className="p-8"><h1 className="text-2xl font-bold">Menu Management - Coming Soon</h1></div>} />
-              <Route path="menu/add" element={<div className="p-8"><h1 className="text-2xl font-bold">Add Menu Item - Coming Soon</h1></div>} />
-              <Route path="analytics" element={<div className="p-8"><h1 className="text-2xl font-bold">Analytics - Coming Soon</h1></div>} />
-              <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings - Coming Soon</h1></div>} />
+              <Route path="menu" element={<RestaurantMenu />} />
+              <Route path="reviews" element={<RestaurantReviews />} />
+              <Route path="followers" element={<RestaurantFollowers />} />
+              <Route path="analytics" element={<RestaurantAnalytics />} />
+              <Route path="settings" element={<RestaurantSettings />} />
             </Route>
+
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Router>
