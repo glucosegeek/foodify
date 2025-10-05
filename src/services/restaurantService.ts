@@ -586,6 +586,53 @@ export async function getRestaurants(filters?: {
   }
 }
 
+/**
+ * Get restaurant stats
+ */
+export async function getRestaurantStats(restaurantId: string): Promise<{
+  followerCount: number;
+  reviewCount: number;
+  menuItemCount: number;
+  averageRating: number;
+}> {
+  try {
+    const [followersResult, reviewsResult, menuItemsResult] = await Promise.all([
+      supabase
+        .from('restaurant_follows')
+        .select('user_id', { count: 'exact', head: true })
+        .eq('restaurant_id', restaurantId),
+      supabase
+        .from('reviews')
+        .select('rating')
+        .eq('restaurant_id', restaurantId),
+      supabase
+        .from('menu_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('restaurant_id', restaurantId),
+    ]);
+
+    const ratings = reviewsResult.data?.map(r => r.rating) || [];
+    const averageRating = ratings.length > 0
+      ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+      : 0;
+
+    return {
+      followerCount: followersResult.count || 0,
+      reviewCount: reviewsResult.data?.length || 0,
+      menuItemCount: menuItemsResult.count || 0,
+      averageRating: Number(averageRating.toFixed(1)),
+    };
+  } catch (error) {
+    console.error('Error fetching restaurant stats:', error);
+    return {
+      followerCount: 0,
+      reviewCount: 0,
+      menuItemCount: 0,
+      averageRating: 0,
+    };
+  }
+}
+
 // Get unique filter options
 export async function getFilterOptions() {
   try {
