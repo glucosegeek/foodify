@@ -568,8 +568,10 @@ export async function getRestaurantStats(restaurantId: string): Promise<{
       averageRating: 0,
     };
   }
-  // Get unique filter options
-export async function getFilterOptions() {
+}
+
+// Get unique filter options
+export async function getFilterOptions() {  // <-- BEZ WCIĘCIA!
   try {
     const { data, error } = await supabase
       .from('restaurants')
@@ -600,5 +602,4 @@ export async function getFilterOptions() {
       dietaryOptions: [],
     };
   }
-}
 }
