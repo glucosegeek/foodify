@@ -7,20 +7,14 @@ export function HomePage() {
   const location = useLocation();
 
   useEffect(() => {
-    // Handle scroll to hash on page load/navigation
     if (location.hash) {
       const targetId = location.hash.replace('#', '');
-      
-      // Use requestAnimationFrame + setTimeout for better timing
       requestAnimationFrame(() => {
         setTimeout(() => {
           const element = document.getElementById(targetId);
           if (element) {
-            // Get header height dynamically
             const header = document.querySelector('header');
             const headerHeight = header?.offsetHeight || 64;
-            
-            // Calculate position with offset
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
             
@@ -32,7 +26,6 @@ export function HomePage() {
         }, 150);
       });
     } else {
-      // If no hash, scroll to top of page
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [location.hash, location.pathname]);
