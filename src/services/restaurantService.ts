@@ -20,26 +20,6 @@ export interface MenuItemWithCategory extends MenuItem {
 // =============================================
 
 /**
- * Get restaurant by user ID
- */
-export async function getRestaurantByUserId(userId: string): Promise<Restaurant | null> {
-  try {
-    const { data, error } = await supabase
-      .from('restaurants')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error;
-
-    return data;
-  } catch (error) {
-    console.error('Error fetching restaurant:', error);
-    return null;
-  }
-}
-
-/**
  * Get restaurant by ID or slug
  */
 export async function getRestaurant(idOrSlug: string): Promise<Restaurant | null> {
@@ -519,6 +499,23 @@ export async function getRestaurantFollowers(restaurantId: string): Promise<Prof
   } catch (error) {
     console.error('Error fetching restaurant followers:', error);
     return [];
+  }
+}
+
+// Fetch single restaurant by ID or slug
+export async function getRestaurantBySlug(slug: string) {
+  try {
+    const { data, error } = await supabase
+      .from('restaurants')
+      .select('*')
+      .or(`slug.eq.${slug},id.eq.${slug}`)
+      .single();
+
+    if (error) throw error;
+    return { data: data as Restaurant, error: null };
+  } catch (error) {
+    console.error('Error fetching restaurant:', error);
+    return { data: null, error };
   }
 }
 
