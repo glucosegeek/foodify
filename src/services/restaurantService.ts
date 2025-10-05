@@ -22,40 +22,6 @@ export interface MenuItemWithCategory extends MenuItem {
 /**
  * Get restaurant by user ID
  */
-  // Get unique filter options
-export async function getFilterOptions() {
-  try {
-    const { data, error } = await supabase
-      .from('restaurants')
-      .select('cuisine_type, location, price_range, dining_style, dietary_options');
-
-    if (error) throw error;
-
-    const cuisines = [...new Set(data?.map(r => r.cuisine_type).filter(Boolean))];
-    const locations = [...new Set(data?.map(r => r.location).filter(Boolean))];
-    const priceRanges = [...new Set(data?.map(r => r.price_range).filter(Boolean))];
-    const diningStyles = [...new Set(data?.map(r => r.dining_style).filter(Boolean))];
-    const dietaryOptions = [...new Set(data?.flatMap(r => r.dietary_options || []).filter(Boolean))];
-
-    return {
-      cuisines,
-      locations,
-      priceRanges,
-      diningStyles,
-      dietaryOptions,
-    };
-  } catch (error) {
-    console.error('Error fetching filter options:', error);
-    return {
-      cuisines: [],
-      locations: [],
-      priceRanges: [],
-      diningStyles: [],
-      dietaryOptions: [],
-    };
-  }
-}
-
 export async function getRestaurantByUserId(userId: string): Promise<Restaurant | null> {
   try {
     const { data, error } = await supabase
