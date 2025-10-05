@@ -1,36 +1,14 @@
-import React, { useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-type UserRole = 'CUSTOMER' | 'RESTAURANT' | 'ADMIN';
-
 interface RoleBasedRouteProps {
-  children?: React.ReactNode;
-  allowedRoles: UserRole[];
+  children: React.ReactNode;
+  allowedRole: 'customer' | 'restaurant';
 }
 
-export function RoleBasedRoute({ children, allowedRoles }: RoleBasedRouteProps) {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Redirect to appropriate dashboard if user is on /dashboard
-    if (user && window.location.pathname === '/dashboard') {
-      switch (user.role) {
-        case 'CUSTOMER':
-          navigate('/dashboard/customer', { replace: true });
-          break;
-        case 'RESTAURANT':
-          navigate('/dashboard/restaurant', { replace: true });
-          break;
-        case 'ADMIN':
-          navigate('/dashboard/admin', { replace: true });
-          break;
-        default:
-          navigate('/', { replace: true });
-      }
-    }
-  }, [user, navigate]);
+export function RoleBasedRoute({ children, allowedRole }: RoleBasedRouteProps) {
+  const { profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -40,22 +18,14 @@ export function RoleBasedRoute({ children, allowedRoles }: RoleBasedRouteProps) 
     );
   }
 
-  if (!user) {
+  if (!profile) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
-    // Redirect to appropriate dashboard for user's role
-    switch (user.role) {
-      case 'CUSTOMER':
-        return <Navigate to="/dashboard/customer" replace />;
-      case 'RESTAURANT':
-        return <Navigate to="/dashboard/restaurant" replace />;
-      case 'ADMIN':
-        return <Navigate to="/dashboard/admin" replace />;
-      default:
-        return <Navigate to="/" replace />;
-    }
+  if (profile.role !== allowedRole) {
+    // Redirect based on actual role
+    const redirectPath = profile.role === 'restaurant' ? '/dashboard' : '/customer';
+    return <Navigate to={redirectPath} replace />;
   }
 
   return <>{children}</>;
