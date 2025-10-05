@@ -678,23 +678,6 @@ export async function getRestaurantByUserId(userId: string) {
   }
 }
 
-// Fetch menu items for a restaurant
-export async function getMenuItems(restaurantId: string) {
-  try {
-    const { data, error } = await supabase
-      .from('menu_items')
-      .select('*')
-      .eq('restaurant_id', restaurantId)
-      .order('display_order', { ascending: true });
-
-    if (error) throw error;
-    return data as MenuItem[];
-  } catch (error) {
-    console.error('Error fetching menu items:', error);
-    return [];
-  }
-}
-
 // Get unique filter options
 export async function getFilterOptions() {
   try {
