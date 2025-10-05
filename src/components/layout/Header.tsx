@@ -1,14 +1,13 @@
 import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ChefHat, User, LogOut, Settings, Shield, Store } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChefHat, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 
 export function Header() {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -17,80 +16,6 @@ export function Header() {
       console.error('Error signing out:', error);
     }
   };
-
-  // Generic handler for section-based navigation
-  const handleSectionClick = (sectionId: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    
-    if (location.pathname === '/') {
-      // Already on home page, just scroll
-      const element = document.getElementById(sectionId);
-if (element) {
-  const header = document.querySelector('header');
-  const headerHeight = header?.offsetHeight || 64;
-  
-  const elementPosition = element.getBoundingClientRect().top;
-  const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-  
-  window.scrollTo({
-    top: offsetPosition,
-    behavior: 'smooth'
-  });
-}
-    } else {
-      // Navigate to home page with hash
-      navigate(`/#${sectionId}`);
-      // Scroll will happen after navigation via useEffect in HomePage
-    }
-  };
-
-  const getDashboardLink = () => {
-    if (!user) return '/dashboard';
-
-    // @ts-ignore - role will be added when Supabase is integrated
-    switch (user.role) {
-      case 'CUSTOMER':
-        return '/dashboard/customer';
-      case 'RESTAURANT':
-        return '/dashboard/restaurant';
-      case 'ADMIN':
-        return '/dashboard/customer';
-      default:
-        return '/dashboard';
-    }
-  };
-
-  const getRoleIcon = () => {
-    if (!user) return User;
-    
-    // @ts-ignore - role will be added when Supabase is integrated
-    switch (user.role) {
-      case 'RESTAURANT':
-        return Store;
-      case 'ADMIN':
-        return Shield;
-      default:
-        return User;
-    }
-  };
-
-  const getRoleLabel = () => {
-    if (!user) return '';
-    
-    // @ts-ignore - role will be added when Supabase is integrated
-    switch (user.role) {
-      case 'CUSTOMER':
-        return 'Customer';
-      case 'RESTAURANT':
-        return 'Restaurant';
-      case 'ADMIN':
-        return 'Admin';
-      default:
-        return '';
-    }
-  };
-
-  const RoleIcon = getRoleIcon();
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
@@ -102,34 +27,50 @@ if (element) {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <a
-              href="/#discover"
-              onClick={handleSectionClick('discover')}
+            <Link
+              to="/"
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
             >
               Discover
-            </a>
-            <a
-              href="/#top-restaurants"
-              onClick={handleSectionClick('top-restaurants')}
+            </Link>
+            <Link
+              to="/top-restaurants"
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
             >
               Top Restaurants
-            </a>
+            </Link>
+            {user && (
+              <Link
+                to={profile?.role === 'restaurant' ? '/dashboard' : '/profile'}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              >
+                {profile?.role === 'restaurant' ? 'Dashboard' : 'Profile'}
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center space-x-4">
             {user ? (
-              <div className="flex items-center space-x-2">
-                <Link 
-                  to="/dashboard"
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+              <div className="flex items-center space-x-3">
+                <Link
+                  to={profile?.role === 'restaurant' ? '/dashboard/settings' : '/profile/settings'}
+                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
                 >
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600 font-semibold">
-                    {user.email?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <span className="text-sm text-gray-700 font-medium hidden sm:inline">
-                    {user.email}
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt={profile.full_name || 'Avatar'}
+                      className="h-8 w-8 rounded-full object-cover border-2 border-gray-200"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center border-2 border-gray-200">
+                      <span className="text-sm font-semibold text-orange-600">
+                        {(profile?.full_name || profile?.username || user.email || 'U')[0].toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <span className="text-sm text-gray-600 hidden sm:inline max-w-[150px] truncate">
+                    {profile?.full_name || profile?.username || user.email}
                   </span>
                 </Link>
                 <Button
@@ -146,13 +87,11 @@ if (element) {
               <div className="flex items-center space-x-3">
                 <Link to="/auth">
                   <Button variant="ghost" size="sm">
-                    Sign In 
+                    Sign In
                   </Button>
                 </Link>
                 <Link to="/auth?mode=signup">
-                  <Button size="sm">
-                    Get Started
-                  </Button>
+                  <Button size="sm">Get Started</Button>
                 </Link>
               </div>
             )}
