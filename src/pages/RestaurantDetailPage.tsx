@@ -231,7 +231,7 @@ export function RestaurantDetailPage() {
               {restaurant.website && (
                 <div className="flex items-center">
                   <Globe className="h-5 w-5 text-gray-400 mr-2" />
-                  
+                   <a
                     href={restaurant.website}
                     target="_blank"
                     rel="noopener noreferrer"
