@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { Database } from '../types/database';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { Star, MapPin, DollarSign, Loader2, Search } from 'lucide-react';
+import { Star, MapPin, DollarSign, Search } from 'lucide-react';
+import mockData from '../data/mockData';
 
-type Restaurant = Database['public']['Tables']['restaurants']['Row'];
+type Restaurant = typeof mockData.restaurants[0];
 
 export function RestaurantPage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -15,26 +14,12 @@ export function RestaurantPage() {
   const [cuisineFilter, setCuisineFilter] = useState<string>('');
 
   useEffect(() => {
-    fetchRestaurants();
-  }, []);
-
-  const fetchRestaurants = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('restaurants')
-        .select('*')
-        .order('rating', { ascending: false });
-
-      if (error) throw error;
-
-      setRestaurants(data || []);
-    } catch (error) {
-      console.error('Error fetching restaurants:', error);
-    } finally {
+    // Symulacja ładowania z API
+    setTimeout(() => {
+      setRestaurants(mockData.restaurants);
       setLoading(false);
-    }
-  };
+    }, 500);
+  }, []);
 
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesSearch =
@@ -82,7 +67,7 @@ export function RestaurantPage() {
           <DollarSign
             key={i}
             className={`h-4 w-4 ${
-              i < priceRange.length ? 'opacity-100' : 'opacity-30'
+              i < priceRange.length ? 'opacity-100' : 'opacity-20'
             }`}
           />
         ))}
@@ -93,7 +78,7 @@ export function RestaurantPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
     );
   }
@@ -101,15 +86,15 @@ export function RestaurantPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">All Restaurants</h1>
-          <p className="text-gray-600 mt-2">
-            Discover amazing restaurants in your area
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Discover Restaurants</h1>
+          <p className="text-gray-600">Find your next favorite dining spot</p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
+        {/* Filters */}
+        <div className="mb-6 space-y-4">
+          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
@@ -121,6 +106,7 @@ export function RestaurantPage() {
             />
           </div>
 
+          {/* Cuisine Filter */}
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setCuisineFilter('')}
@@ -148,79 +134,77 @@ export function RestaurantPage() {
           </div>
         </div>
 
+        {/* Results Count */}
+        <div className="mb-4">
+          <p className="text-gray-600">
+            {filteredRestaurants.length} {filteredRestaurants.length === 1 ? 'restaurant' : 'restaurants'} found
+          </p>
+        </div>
+
         {/* Restaurant Grid */}
-        {filteredRestaurants.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
-              No restaurants found matching your criteria.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRestaurants.map((restaurant) => (
-              <Link
-                key={restaurant.id}
-                to={`/restaurant/${restaurant.slug}`}
-                className="block"
-              >
-                <Card hover className="h-full">
-                  <div className="relative">
-                    <img
-                      src={
-                        restaurant.cover_photo_url ||
-                        restaurant.logo_url ||
-                        'https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg?auto=compress&cs=tinysrgb&w=600'
-                      }
-                      alt={restaurant.name}
-                      className="w-full h-48 object-cover rounded-t-xl"
-                    />
-                    <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-2 py-1">
-                      {renderStars(restaurant.rating)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredRestaurants.map((restaurant) => (
+            <Link key={restaurant.id} to={`/restaurant/${restaurant.slug}`}>
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="aspect-video overflow-hidden rounded-t-lg">
+                  <img
+                    src={restaurant.cover_photo_url || restaurant.logo_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600'}
+                    alt={restaurant.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{restaurant.name}</h3>
+                    {restaurant.is_featured && (
+                      <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded">
+                        Featured
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {restaurant.description}
+                  </p>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      {renderStars(restaurant.rating || 0)}
+                      <span className="text-xs text-gray-500">
+                        ({restaurant.review_count} reviews)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center text-sm text-gray-600">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {restaurant.location}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {restaurant.cuisine_type}
+                      </span>
+                      {renderPriceRange(restaurant.price_range)}
                     </div>
                   </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-orange-500 transition-colors">
-                        {restaurant.name}
-                      </h3>
-                      <div className="flex flex-col items-end space-y-1">
-                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                          {restaurant.cuisine_type}
-                        </span>
-                        {renderPriceRange(restaurant.price_range)}
-                      </div>
-                    </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
 
-                    {restaurant.description && (
-                      <p className="text-gray-600 mb-3 text-sm line-clamp-2">
-                        {restaurant.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center text-gray-500 text-sm">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      <span>{restaurant.location}</span>
-                    </div>
-
-                    {restaurant.dietary_options &&
-                      restaurant.dietary_options.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-100">
-                          <div className="flex flex-wrap gap-1">
-                            {restaurant.dietary_options.slice(0, 3).map((option) => (
-                              <span
-                                key={option}
-                                className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
-                              >
-                                {option.replace('_', ' ')}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+        {filteredRestaurants.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No restaurants found matching your criteria.</p>
+            <Button
+              onClick={() => {
+                setSearchTerm('');
+                setCuisineFilter('');
+              }}
+              className="mt-4"
+            >
+              Clear Filters
+            </Button>
           </div>
         )}
       </div>
