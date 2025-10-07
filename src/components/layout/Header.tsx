@@ -22,9 +22,10 @@ export function Header() {
     }
   };
 
-  const getDashboardLink = () => {
-    if (!profile) return '/';
-    return profile.role === 'restaurant' ? '/dashboard' : '/customer';
+  const handleProfileClick = () => {
+    if (!profile) return;
+    const path = profile.role === 'restaurant' ? '/dashboard' : '/customer';
+    navigate(path);
   };
 
   return (
@@ -52,22 +53,15 @@ export function Header() {
             >
               Restaurants
             </Link>
-            {user && (
-              <Link
-                to={getDashboardLink()}
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-              >
-                {profile?.role === 'restaurant' ? 'Dashboard' : 'My Account'}
-              </Link>
-            )}
           </nav>
 
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-3">
-                <Link
-                  to={getDashboardLink()}
-                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                <button
+                  onClick={handleProfileClick}
+                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer"
+                  disabled={!profile}
                 >
                   <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center border-2 border-gray-200">
                     <span className="text-sm font-semibold text-orange-600">
@@ -77,7 +71,7 @@ export function Header() {
                   <span className="text-sm text-gray-600 hidden sm:inline max-w-[150px] truncate">
                     {profile?.email || user.email}
                   </span>
-                </Link>
+                </button>
                 <Button
                   variant="ghost"
                   size="sm"
