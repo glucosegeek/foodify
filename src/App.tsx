@@ -53,7 +53,7 @@ function App() {
               path="/customer/*"
               element={
                 <ProtectedRoute>
-                  <RoleBasedRoute allowedRole="customer">
+                  <RoleBasedRoute allowedRole="CUSTOMER">
                     <CustomerDashboardLayout />
                   </RoleBasedRoute>
                 </ProtectedRoute>
@@ -72,7 +72,7 @@ function App() {
               path="/dashboard/*"
               element={
                 <ProtectedRoute>
-                  <RoleBasedRoute allowedRole="restaurant">
+                  <RoleBasedRoute allowedRole="RESTAURANT">
                     <RestaurantDashboardLayout />
                   </RoleBasedRoute>
                 </ProtectedRoute>

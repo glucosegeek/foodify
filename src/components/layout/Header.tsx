@@ -24,7 +24,7 @@ export function Header() {
 
   const handleProfileClick = () => {
     if (!profile) return;
-    const path = profile.role === 'restaurant' ? '/dashboard' : '/customer';
+    const path = profile.role === 'RESTAURANT' ? '/dashboard' : '/customer';
     navigate(path);
   };
 

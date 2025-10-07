@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type UserRole = 'customer' | 'restaurant';
+export type UserRole = 'CUSTOMER' | 'RESTAURANT' | 'ADMIN';
 export type DiningStyle = 'fine_dining' | 'casual' | 'fast_casual';
 export type DietaryTag = 'vegetarian' | 'vegan' | 'gluten_free' | 'halal' | 'kosher';
 

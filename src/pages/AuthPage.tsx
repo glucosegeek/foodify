@@ -13,7 +13,7 @@ export function AuthPage() {
 
   useEffect(() => {
     if (user && profile && !loading) {
-      const redirectPath = profile.role === 'customer' ? '/customer' : '/dashboard';
+      const redirectPath = profile.role === 'CUSTOMER' ? '/customer' : '/dashboard';
       navigate(redirectPath);
     }
   }, [user, profile, loading, navigate]);

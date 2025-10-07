@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface RoleBasedRouteProps {
   children: React.ReactNode;
-  allowedRole: 'customer' | 'restaurant';
+  allowedRole: 'CUSTOMER' | 'RESTAURANT';
 }
 
 export function RoleBasedRoute({ children, allowedRole }: RoleBasedRouteProps) {
@@ -24,7 +24,7 @@ export function RoleBasedRoute({ children, allowedRole }: RoleBasedRouteProps) {
 
   if (profile.role !== allowedRole) {
     // Redirect based on actual role
-    const redirectPath = profile.role === 'restaurant' ? '/dashboard' : '/customer';
+    const redirectPath = profile.role === 'RESTAURANT' ? '/dashboard' : '/customer';
     return <Navigate to={redirectPath} replace />;
   }
 

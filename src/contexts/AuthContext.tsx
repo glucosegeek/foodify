@@ -11,7 +11,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName?: string, role?: 'customer' | 'restaurant') => Promise<void>;
+  signUp: (email: string, password: string, fullName?: string, role?: 'CUSTOMER' | 'RESTAURANT') => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -139,7 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string,
     password: string,
     fullName?: string,
-    role: 'customer' | 'restaurant' = 'customer'
+    role: 'CUSTOMER' | 'RESTAURANT' = 'CUSTOMER'
   ) => {
     try {
       // Create auth user with metadata
@@ -162,10 +162,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Profile is automatically created by database trigger (handle_new_user)
       // But we need to update the role if it's a restaurant
-      if (role === 'restaurant') {
+      if (role === 'RESTAURANT') {
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ role: 'restaurant' })
+          .update({ role: 'RESTAURANT' })
           .eq('id', data.user.id);
 
         if (profileError) {
@@ -174,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // For customers, create customer_profile
-      if (role === 'customer') {
+      if (role === 'CUSTOMER') {
         const { error: customerProfileError } = await supabase
           .from('customer_profiles')
           .insert({

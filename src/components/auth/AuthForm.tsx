@@ -11,7 +11,7 @@ const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().optional(),
-  role: z.enum(['customer', 'restaurant']).optional(),
+  role: z.enum(['CUSTOMER', 'RESTAURANT']).optional(),
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -35,7 +35,7 @@ export function AuthForm({ mode, onToggleMode }: AuthFormProps) {
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
     defaultValues: {
-      role: 'customer',
+      role: 'CUSTOMER',
     },
   });
 
@@ -106,7 +106,7 @@ export function AuthForm({ mode, onToggleMode }: AuthFormProps) {
                       <input
                         type="radio"
                         {...register('role')}
-                        value="customer"
+                        value="CUSTOMER"
                         className="sr-only"
                       />
                       <span className="flex flex-1">
@@ -119,7 +119,7 @@ export function AuthForm({ mode, onToggleMode }: AuthFormProps) {
                           </span>
                         </span>
                       </span>
-                      {selectedRole === 'customer' && (
+                      {selectedRole === 'CUSTOMER' && (
                         <svg
                           className="h-5 w-5 text-orange-600 absolute top-4 right-4"
                           viewBox="0 0 20 20"
@@ -138,7 +138,7 @@ export function AuthForm({ mode, onToggleMode }: AuthFormProps) {
                       <input
                         type="radio"
                         {...register('role')}
-                        value="restaurant"
+                        value="RESTAURANT"
                         className="sr-only"
                       />
                       <span className="flex flex-1">
@@ -151,7 +151,7 @@ export function AuthForm({ mode, onToggleMode }: AuthFormProps) {
                           </span>
                         </span>
                       </span>
-                      {selectedRole === 'restaurant' && (
+                      {selectedRole === 'RESTAURANT' && (
                         <svg
                           className="h-5 w-5 text-orange-600 absolute top-4 right-4"
                           viewBox="0 0 20 20"
