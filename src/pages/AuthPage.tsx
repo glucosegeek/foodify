@@ -6,16 +6,17 @@ import { useAuth } from '../contexts/AuthContext';
 export function AuthPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile, loading } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>(
     searchParams.get('mode') === 'signup' ? 'signup' : 'signin'
   );
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
+    if (user && profile && !loading) {
+      const redirectPath = profile.role === 'customer' ? '/customer' : '/dashboard';
+      navigate(redirectPath);
     }
-  }, [user, navigate]);
+  }, [user, profile, loading, navigate]);
 
   const toggleMode = () => {
     setMode(mode === 'signin' ? 'signup' : 'signin');
