@@ -51,7 +51,7 @@ export function AuthForm({ mode, onToggleMode }: AuthFormProps) {
         await signIn(data.email, data.password);
       } else {
         await signUp(data.email, data.password, data.fullName, data.role);
-        setSuccess('Account created! Please check your email to verify your account.');
+        setSuccess('Account created successfully!');
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred');

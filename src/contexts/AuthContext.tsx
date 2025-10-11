@@ -142,7 +142,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: 'CUSTOMER' | 'RESTAURANT' = 'CUSTOMER'
   ) => {
     try {
-      // Create auth user with metadata
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -160,10 +159,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('User creation failed');
       }
 
-      // Profile is automatically created by database trigger (handle_new_user)
-      // But we need to update the role and create extended profiles
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       if (role === 'RESTAURANT') {
-        // Update profile role
         const { error: profileError } = await supabase
           .from('profiles')
           .update({ role: 'RESTAURANT' })
@@ -171,14 +169,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (profileError) {
           console.error('Error updating profile role:', profileError);
-          throw new Error('Database error updating profile role');
+          throw new Error(`Failed to update profile role: ${profileError.message}`);
         }
 
-        // Create restaurant_profile with required fields
-        const baseSlug = data.user.email?.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-') || 'restaurant';
-        const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const slug = `${baseSlug}-${randomSuffix}`;
-        const name = fullName || data.user.email?.split('@')[0] || 'My Restaurant';
+        const baseSlug = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-') || 'restaurant';
+        const timestamp = Date.now().toString(36);
+        const slug = `${baseSlug}-${timestamp}`;
+        const name = fullName || email.split('@')[0] || 'My Restaurant';
 
         const { error: restaurantProfileError } = await supabase
           .from('restaurant_profiles')
@@ -190,28 +187,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (restaurantProfileError) {
           console.error('Error creating restaurant profile:', restaurantProfileError);
-          throw new Error(`Database error saving new user: ${restaurantProfileError.message}`);
+          throw new Error(`Failed to create restaurant profile: ${restaurantProfileError.message}`);
         }
       }
 
-      // For customers, create customer_profile
       if (role === 'CUSTOMER') {
-        const baseUsername = data.user.email?.split('@')[0] || 'user';
-        const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const username = `${baseUsername}${randomSuffix}`;
+        const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '') || 'user';
+        const timestamp = Date.now().toString(36);
+        const username = `${baseUsername}_${timestamp}`;
 
         const { error: customerProfileError } = await supabase
           .from('customer_profiles')
           .insert({
             id: data.user.id,
             username: username,
-            favorite_cuisines: [],
-            dietary_restrictions: [],
           });
 
         if (customerProfileError) {
           console.error('Error creating customer profile:', customerProfileError);
-          throw new Error(`Database error saving new user: ${customerProfileError.message}`);
+          throw new Error(`Failed to create customer profile: ${customerProfileError.message}`);
         }
       }
 
