@@ -178,10 +178,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { error: customerProfileError } = await supabase
           .from('customer_profiles')
           .insert({
-            user_id: data.user.id,
-            preferred_cuisines: [],
+            id: data.user.id,
+            username: data.user.email?.split('@')[0] || 'user',
+            favorite_cuisines: [],
             dietary_restrictions: [],
-            favorite_restaurants: [],
           });
 
         if (customerProfileError) {
