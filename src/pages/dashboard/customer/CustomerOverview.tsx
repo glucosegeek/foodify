@@ -1,28 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Heart, 
-  Users, 
-  MessageSquare, 
-  Camera, 
+import {
+  Heart,
+  Users,
+  MessageSquare,
+  Camera,
   Star,
   TrendingUp,
   MapPin,
-  Clock
+  Clock,
+  Activity
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
 import { useAuth } from '../../../contexts/AuthContext';
+import { ActivityFeed } from '../../../components/social/ActivityFeed';
+import { getCustomerStats } from '../../../services/customerService';
+import { usePresence } from '../../../hooks/usePresence';
 
 export function CustomerOverview() {
   const { user } = useAuth();
+  const { onlineUsers } = usePresence(user?.id);
+  const [stats, setStats] = useState({
+    reviewCount: 0,
+    followingCount: 0,
+    restaurantFollowsCount: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - will be replaced with API calls
-  const stats = {
-    reviews: 12,
-    following: 8,
-    favorites: 15,
-    photos: 24
-  };
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchStats = async () => {
+      setLoading(true);
+      const data = await getCustomerStats(user.id);
+      setStats(data);
+      setLoading(false);
+    };
+
+    fetchStats();
+  }, [user]);
 
   const recentActivity = [
     {
@@ -124,10 +140,9 @@ export function CustomerOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Your Reviews</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.reviews}</p>
-                <p className="text-xs text-green-600 mt-2 flex items-center">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  +3 this month
+                <p className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.reviewCount}</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Total reviews written
                 </p>
               </div>
               <div className="bg-blue-50 p-3 rounded-full">
@@ -143,10 +158,9 @@ export function CustomerOverview() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Following</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.following}</p>
-                  <p className="text-xs text-green-600 mt-2 flex items-center">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    +2 this week
+                  <p className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.followingCount}</p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {onlineUsers.length} online now
                   </p>
                 </div>
                 <div className="bg-green-50 p-3 rounded-full">
@@ -163,9 +177,9 @@ export function CustomerOverview() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Favorites</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.favorites}</p>
+                  <p className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.restaurantFollowsCount}</p>
                   <p className="text-xs text-gray-500 mt-2">
-                    5 themed lists
+                    Favorite restaurants
                   </p>
                 </div>
                 <div className="bg-red-50 p-3 rounded-full">
@@ -195,12 +209,15 @@ export function CustomerOverview() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Activity */}
+        {/* Real-Time Activity Feed */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
+                <div className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-blue-600" />
+                  <h2 className="text-xl font-bold text-gray-900">Activity Feed</h2>
+                </div>
                 <Link
                   to="/dashboard/customer/activities"
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -208,42 +225,10 @@ export function CustomerOverview() {
                   View All
                 </Link>
               </div>
+              <p className="text-sm text-gray-600 mt-1">Updates from people and restaurants you follow</p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity) => {
-                  const Icon = activity.icon;
-                  return (
-                    <div key={activity.id} className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className={`${activity.bgColor} p-2 rounded-full`}>
-                        <Icon className={`h-5 w-5 ${activity.color}`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-medium text-gray-900">{activity.action}</p>
-                          {activity.rating && (
-                            <div className="flex items-center">
-                              {[...Array(activity.rating)].map((_, i) => (
-                                <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <Link 
-                          to={`/restaurant/${activity.restaurantId}`}
-                          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                        >
-                          {activity.restaurant}
-                        </Link>
-                        <p className="text-xs text-gray-500 mt-1 flex items-center">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {activity.time}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              {user && <ActivityFeed userId={user.id} limit={5} />}
             </CardContent>
           </Card>
         </div>
