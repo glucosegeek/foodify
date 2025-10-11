@@ -175,17 +175,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // For customers, create customer_profile
       if (role === 'CUSTOMER') {
+        const baseUsername = data.user.email?.split('@')[0] || 'user';
+        const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        const username = `${baseUsername}${randomSuffix}`;
+
         const { error: customerProfileError } = await supabase
           .from('customer_profiles')
           .insert({
             id: data.user.id,
-            username: data.user.email?.split('@')[0] || 'user',
+            username: username,
             favorite_cuisines: [],
             dietary_restrictions: [],
           });
 
         if (customerProfileError) {
           console.error('Error creating customer profile:', customerProfileError);
+          throw new Error('Failed to create customer profile. Please try again.');
         }
       }
 
