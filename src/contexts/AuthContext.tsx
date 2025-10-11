@@ -161,8 +161,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Profile is automatically created by database trigger (handle_new_user)
-      // But we need to update the role if it's a restaurant
+      // But we need to update the role and create extended profiles
       if (role === 'RESTAURANT') {
+        // Update profile role
         const { error: profileError } = await supabase
           .from('profiles')
           .update({ role: 'RESTAURANT' })
@@ -170,6 +171,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (profileError) {
           console.error('Error updating profile role:', profileError);
+          throw new Error('Database error updating profile role');
+        }
+
+        // Create restaurant_profile with required fields
+        const baseSlug = data.user.email?.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-') || 'restaurant';
+        const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        const slug = `${baseSlug}-${randomSuffix}`;
+        const name = fullName || data.user.email?.split('@')[0] || 'My Restaurant';
+
+        const { error: restaurantProfileError } = await supabase
+          .from('restaurant_profiles')
+          .insert({
+            id: data.user.id,
+            name: name,
+            slug: slug,
+          });
+
+        if (restaurantProfileError) {
+          console.error('Error creating restaurant profile:', restaurantProfileError);
+          throw new Error(`Database error saving new user: ${restaurantProfileError.message}`);
         }
       }
 
@@ -190,7 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (customerProfileError) {
           console.error('Error creating customer profile:', customerProfileError);
-          throw new Error('Failed to create customer profile. Please try again.');
+          throw new Error(`Database error saving new user: ${customerProfileError.message}`);
         }
       }
 

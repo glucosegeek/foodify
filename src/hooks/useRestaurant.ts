@@ -8,7 +8,7 @@ import {
   getRestaurantReviews,
   getRestaurantFollowers,
 } from '../services/restaurantService';
-import { Database } from '../types/database.types';
+import { Database } from '../types/database';
 
 type Restaurant = Database['public']['Tables']['restaurants']['Row'];
 type MenuCategory = Database['public']['Tables']['menu_categories']['Row'];

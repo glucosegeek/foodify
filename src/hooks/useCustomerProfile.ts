@@ -9,7 +9,7 @@ import {
   CustomerProfileData,
   CustomerStats,
 } from '../services/customerService';
-import { Database } from '../types/database.types';
+import { Database } from '../types/database';
 
 type Restaurant = Database['public']['Tables']['restaurants']['Row'];
 type Review = Database['public']['Tables']['reviews']['Row'];

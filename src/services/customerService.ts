@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Database } from '../types/database.types';
+import { Database } from '../types/database';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type CustomerProfile = Database['public']['Tables']['customer_profiles']['Row'];
@@ -36,7 +36,7 @@ export async function getCustomerProfile(userId: string): Promise<CustomerProfil
     const { data: customerProfile, error: customerError } = await supabase
       .from('customer_profiles')
       .select('*')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
 
     if (customerError && customerError.code !== 'PGRST116') {
@@ -95,8 +95,8 @@ export async function updateCustomerPreferences(
     // Check if customer_profile exists
     const { data: existing } = await supabase
       .from('customer_profiles')
-      .select('user_id')
-      .eq('user_id', userId)
+      .select('id')
+      .eq('id', userId)
       .single();
 
     if (existing) {
@@ -104,7 +104,7 @@ export async function updateCustomerPreferences(
       const { error } = await supabase
         .from('customer_profiles')
         .update(preferences)
-        .eq('user_id', userId);
+        .eq('id', userId);
 
       if (error) throw error;
     } else {
@@ -112,7 +112,7 @@ export async function updateCustomerPreferences(
       const { error } = await supabase
         .from('customer_profiles')
         .insert({
-          user_id: userId,
+          id: userId,
           ...preferences,
         });
 
